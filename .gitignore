@@ -225,3 +225,6 @@ data/*/*.bin
 data/*/*.pkl
 data/*/coords.csv
 data/*/graph.gpickle
+
+# Claude Code per-user settings (never tracked; project-shared `.claude/settings.json` IS allowed)
+**/.claude/settings.local.json
