@@ -54,9 +54,12 @@ dropout    = 0.1
 bias       = False
 
 # ── Training schedule ──
-max_iters                   = 5_000
+# Calibrated for smoke runs: 2000 iters is enough for City of London / Manhattan
+# scale (vocab ≤ ~5k, ≥500 visits per node) to converge. Scale up if you see
+# val loss still actively decreasing at the end of training.
+max_iters                   = 2_000
 warmup_iters                = 200
-lr_decay_iters              = 5_000
+lr_decay_iters              = 2_000
 batch_size                  = 64
 gradient_accumulation_steps = 1
 
