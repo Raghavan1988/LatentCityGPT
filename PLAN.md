@@ -11,20 +11,30 @@ grid) before scaling up the corpus or model.
 
 ## Phase 0 — Data  ✅ DONE
 
-`data/prepare_city.py` is written and smoke-tested.
+`data/prepare_city.py` is written, smoke-tested, and four real-city corpora are on disk.
 
-- OSM pull (OSMnx) -> largest strongly-connected component -> trivial tokenizer
-  (`0=PAD,1=BOS,2=EOS`, real nodes from 3) -> blended shortest-path + random-walk
-  routes -> destination holdout -> nanoGPT-format outputs (`train/val/gen.bin`,
-  `meta.pkl`, `coords.csv`, `graph.gpickle`).
-- **Acceptance (met):** smoke test passes — tokenizer bijection, all routes
-  traverse only real edges, gen routes end on held-out destinations while train
-  routes never do, binary roundtrips, token stream contains no coordinate values.
+- Pipeline: OSM pull (OSMnx) -> largest strongly-connected component -> trivial
+  tokenizer (`0=PAD,1=BOS,2=EOS`, real nodes from 3) -> blended shortest-path +
+  random-walk routes -> destination holdout -> nanoGPT-format outputs
+  (`train/val/gen.bin`, `meta.pkl`, `coords.csv`, `graph.gpickle`).
+- `--place` accepts one or more OSM place names; OSMnx unions multiple names
+  into a single graph (used to build the South Bay corpus from Mountain View +
+  Sunnyvale + Santa Clara).
+- **Acceptance (met):** `tests/test_prepare_city.py` passes on a synthetic grid
+  (tokenizer bijection, route-edge validity, destination-holdout integrity,
+  binary roundtrip, plus an out-of-vocab guard in `dump()` that asserts every
+  `*.bin` value is in `[0, vocab_size)`). Pipeline produces real corpora at
+  `data/{london_city,manhattan,boston,southbay}/` — see CLAUDE.md for the table.
 
-**Follow-up task (do during Phase 2):** add a `--split geographic` mode to
-`split_destinations` that holds out a contiguous lat/lon sub-region instead of
-scattered nodes (stronger generalization claim). Coords used only to *define* the
-split, never written into tokens.
+**Follow-up tasks (do during Phase 2):**
+- Add `--split geographic` mode to `split_destinations` that holds out a
+  contiguous lat/lon sub-region instead of scattered nodes (stronger
+  generalization claim). Coords used only to *define* the split, never written
+  into tokens.
+- For headline-scale runs on cities >10k nodes, replace networkx Dijkstra with
+  **igraph** (~10× faster). Empirical: at 45,696 nodes, `n_shortest=30k` took
+  ~50 min wall on networkx; the full `n_shortest=200k` default would be ~5 h
+  without this swap.
 
 ---
 

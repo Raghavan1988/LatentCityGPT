@@ -91,7 +91,9 @@ benchmark).
 
 ## Status
 
-Data pipeline done and smoke-tested. Model and evals in progress — see `PLAN.md`.
+Data pipeline done; four real-city corpora on disk (City of London, Manhattan,
+Boston, South Bay tri-city — see `CLAUDE.md` for the dataset table). Model and
+evals in progress — see `PLAN.md`.
 
 ## References
 
