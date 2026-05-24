@@ -10,9 +10,10 @@ project asks:
 > it ever saw was arbitrary integer IDs?
 
 This is the [Othello-GPT](https://arxiv.org/abs/2210.13382) emergent-world-model
-paradigm transplanted from a synthetic board onto real geography. The headline
-artifact is a probe-decoded overlay: a recognizable city reassembling itself out
-of a model fed only anonymous tokens.
+paradigm transplanted from a synthetic board onto real geography. The primary
+artifact is a probe-decoded overlay: a model trained only on anonymous integer
+sequences, whose activations — when linearly decoded — reproduce the city's
+actual geometry, verifiable against ground-truth coordinates the model never saw.
 
 ## What we expect to find (a ladder, not a single bet)
 
@@ -57,10 +58,12 @@ python eval/probe.py      --ckpt checkpoints/best.pt --data_dir data/manhattan -
 python viz/overlay.py     --ckpt checkpoints/best.pt --data_dir data/manhattan
 ```
 
-Suggested first city is **Manhattan** (instantly recognizable, ~4-5k nodes, under
-the `uint16` ceiling). Pair it with an irregular core like **City of London** for
-the "no grid to exploit" credibility result. Always run the graph pull alone first
-and check the node count before generating a full corpus.
+Suggested first city is **Manhattan** (well-studied reference street network,
+~4-5k nodes, under the `uint16` ceiling). Pair it with an irregular street
+pattern like **City of London** to control for grid-shortcut artifacts (a model
+could exploit Manhattan's regular grid; the City of London result rules that
+out). Always run the graph pull alone first and check the node count before
+generating a full corpus.
 
 ## Repo
 
@@ -69,7 +72,7 @@ and check the node count before generating a full corpus.
 | `data/prepare_city.py` | OSM street network -> token corpus (done, smoke-tested) |
 | `model/` | nanoGPT-style model + training loop |
 | `eval/` | valid-edge rate, baselines, probe suite, causal patching |
-| `viz/` | Procrustes-aligned recovered-vs-true map overlay (the shareable image) |
+| `viz/` | Procrustes-aligned recovered-vs-true map overlay (the result's visual demonstration) |
 
 ## Docs
 

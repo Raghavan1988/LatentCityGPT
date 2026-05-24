@@ -18,19 +18,22 @@ inputs are arbitrary integers with no positional meaning. The claim:
 
 This is **Othello-GPT** (Li et al.) transplanted from a synthetic board onto real
 geography. Othello-GPT showed an emergent board state recoverable by a probe;
-LatentCityGPT shows an emergent *map*. The substrate is the novelty: a recognizable
-city crystallizing out of integer soup is a screenshot people share, and the
-result is recognizably in a respected interpretability lineage.
+LatentCityGPT shows an emergent *map*. The substrate matters: real geography
+provides an objective metric ground truth (latitude/longitude in meters) against
+which the recovered representation can be measured directly, and the methodology
+sits in an established interpretability lineage.
 
-## Why this substrate (the strategic bet)
+## Why this substrate
 
 Goals, in priority order: (1) demonstrate deep model comprehension — not API
-fine-tuning, but mapping internal structure; (2) produce a viral, shareable
-visual; (3) relevance to frontier-lab work (e.g. spatial/People-Search-adjacent
-reasoning). Real geography beats a synthetic maze on novelty and virality while
-keeping the same rigorous proof technique. A synthetic-grid version is kept only
-as a **control/ablation** (you can dial structure up and down), not as a
-competing headline.
+fine-tuning, but mapping internal structure; (2) produce a result that is
+visually inspectable against an objective ground truth (recovered coordinates
+overlaid on the real street network); (3) relevance to work on spatial /
+world-model reasoning in transformers. Real geography is chosen over a synthetic
+maze because it grounds the recovered representation in a measurable metric
+space (meters of error). A synthetic-grid version is kept only as a
+**control/ablation** (you can dial structure up and down), not as a competing
+substrate.
 
 ## Data representation
 
@@ -95,9 +98,9 @@ comparisons with two different purposes:
 | Comparison | Baseline | What it establishes |
 |---|---|---|
 | Is it a competent route model? (sanity) | uniform random; unigram frequency; 1st/2nd-order Markov; same-size LSTM | LatentCityGPT matches/beats on perplexity and **long-range** coherence (Markov forgets the destination; LatentCityGPT stays goal-directed). This only *earns the right* to make the real claim. |
-| Does it hold a map? (**the headline**) | the *same* LatentCityGPT architecture, **untrained / randomly initialized** | A linear probe recovers true coordinates far better from the trained model than the untrained one. The gap **is** the emergence — it came from learning, not from the probe's own capacity. |
+| Does it hold a map? (**the contribution**) | the *same* LatentCityGPT architecture, **untrained / randomly initialized** | A linear probe recovers true coordinates far better from the trained model than the untrained one. The gap **is** the emergence — it came from learning, not from the probe's own capacity. |
 
-Stack three controls to make the headline airtight:
+Stack three controls to make the contribution airtight:
 
 - **Probe-capacity control** — probe the raw token embeddings / IDs alone.
   They're arbitrary integers, so coordinate R² should be near zero. Proves the
@@ -115,12 +118,13 @@ its next-hop distribution swings toward B's neighbors. A model whose predictions
 bend when you edit its internal sense of location is unambiguously *using* a world
 model.
 
-## Headline metrics & the viral image
+## Primary metrics & the visual demonstration
 
 Report coordinate **R²**, **median reconstruction error in meters**, and a
-**Procrustes-aligned overlay** of recovered vs. true intersection positions. That
-overlay — a recognizable city map reassembling itself from the model's internals —
-is the shareable artifact.
+**Procrustes-aligned overlay** of recovered vs. true intersection positions. The
+overlay is the visual demonstration of the result: a side-by-side rendering of
+what the probe extracted from the model's internals against the city's actual
+geometry, so a reader can verify the metric correspondence directly.
 
 ## The honest one-line claim
 

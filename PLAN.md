@@ -31,7 +31,7 @@ grid) before scaling up the corpus or model.
   contiguous lat/lon sub-region instead of scattered nodes (stronger
   generalization claim). Coords used only to *define* the split, never written
   into tokens.
-- For headline-scale runs on cities >10k nodes, replace networkx Dijkstra with
+- For full-scale runs on cities >10k nodes, replace networkx Dijkstra with
   **igraph** (~10× faster). Empirical: at 45,696 nodes, `n_shortest=30k` took
   ~50 min wall on networkx; the full `n_shortest=200k` default would be ~5 h
   without this swap.
@@ -74,7 +74,8 @@ Goal: the Othello "legal-move-rate" analogue, plus generalization.
 ## Phase 3 — Baselines (earn the right to the claim)
 
 Goal: show LatentCityGPT is a *competent* route model vs strong sequence baselines.
-Remember the trap (CONTEXT.md): this phase is a sanity gate, **not** the headline.
+Remember the trap (CONTEXT.md): this phase is a sanity gate, **not** the core
+contribution. The contribution is the emergent metric map — measured in Phase 4.
 
 - [ ] `eval/baselines.py` — uniform random; unigram frequency; **1st- and 2nd-order
       Markov** over the graph; a **same-parameter-count LSTM**. Report perplexity and a
@@ -85,7 +86,7 @@ Remember the trap (CONTEXT.md): this phase is a sanity gate, **not** the headlin
 
 ---
 
-## Phase 4 — The probe suite (the headline)
+## Phase 4 — The probe suite (the core result)
 
 Goal: recover the metric map from activations and prove it's emergent + linear.
 **All probe code reads `coords.csv`; the model still only ever saw token IDs.**
@@ -118,24 +119,31 @@ Goal: prove the model *uses* the map.
 
 ---
 
-## Phase 6 — Visualization & write-up (the viral part)
+## Phase 6 — Visualization & write-up
 
-- [ ] `viz/overlay.py` — Procrustes-align probe-recovered coordinates to true ones;
-      render recovered-vs-true overlay; optionally animate the map crystallizing across
-      training checkpoints or across layers. This is the shareable image.
-- [ ] Short interactive demo (Streamlit/Vercel): type/click a start + destination, watch
-      the model route, and show the probe-decoded map. Weights -> Hugging Face.
-- [ ] Write-up: methods + the honest one-line claim + the controls table. Lead the
-      visual with the **probe-decoded map**, NOT attention heatmaps (attention isn't
-      explanation — a sharp reviewer discounts that on sight).
-- **Acceptance:** a single overlay image a stranger immediately reads as "that's
-      <city>," reproducible from a checkpoint via one command.
+- [ ] `viz/overlay.py` — Procrustes-align probe-recovered coordinates to true
+      ones; render recovered-vs-true overlay; optionally animate the map taking
+      shape across training checkpoints or across layers. This is the visual
+      record of the result — what an outside observer can inspect to verify the
+      emergent geometry.
+- [ ] Short interactive demo (Streamlit/Vercel): type/click a start + destination,
+      watch the model route, and show the probe-decoded map. Weights -> Hugging
+      Face for reproducibility.
+- [ ] Write-up: methodology, the honest one-line claim, and the full controls
+      table. Lead with the **probe-decoded map**, NOT attention heatmaps —
+      attention is not explanation and a careful reviewer discounts it.
+- **Acceptance:** an overlay where the Procrustes-aligned recovered coordinates
+      reproduce the city's street geometry within a quantifiable error bound
+      (median meters), reproducible from a checkpoint via one command.
 
 ---
 
 ## Definition of done (project)
 
-All six phases pass on at least one real city, the probe result clears every
-control, the causal intervention works, and there's one screenshot that tells the
-whole story. The repo README states the honest one-line claim and links the
-overlay image and demo.
+All six phases pass on at least one real city; the probe result clears every
+control (untrained, raw-embedding, destroyed-structure); the causal intervention
+demonstrably shifts predictions toward the patched location's real neighbors;
+and the recovered-vs-true overlay documents the emergent metric map with a
+reported R² and median error in meters. The repo README states the honest
+one-line claim, links the controls table, and provides a one-command
+reproduction path from raw OSM data to overlay.

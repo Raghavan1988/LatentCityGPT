@@ -37,7 +37,7 @@ eval/
   probe.py            # linear & MLP coordinate probes; trained/untrained/destroyed controls
   causal.py           # activation patching ("I'm at node B" intervention)
 viz/
-  overlay.py          # Procrustes-aligned recovered-vs-true map (the viral image)
+  overlay.py          # Procrustes-aligned recovered-vs-true map (the probe's demonstration artifact)
 checkpoints/          # model weights (gitignored)
 ```
 
@@ -76,7 +76,7 @@ python viz/overlay.py     --ckpt checkpoints/best.pt --data_dir data/cambridge
 - **Determinism:** every script takes `--seed` (default 0) and must be reproducible.
 - **Framework:** PyTorch. Keep the model close to nanoGPT — small, readable, ~10–30M params.
 - **Style:** prefer small, testable functions. Each eval script must be runnable
-  standalone and print a single clear summary line of its headline metric.
+  standalone and print a single clear summary line of its primary metric.
 - **Dataset sizing — visits per node.** Aim for ≥200 real-node visits per token
   during training (`train_real_node_tokens / vocab_size`). Below ~100/node the
   model struggles to learn each node's representation. Smoke-sized
@@ -90,7 +90,7 @@ python viz/overlay.py     --ckpt checkpoints/best.pt --data_dir data/cambridge
 ## What "done" looks like for a task
 
 A task is done when it runs end-to-end on the smoke-sized data, prints its
-headline metric, and (for eval/probe/causal) respects THE ONE RULE — i.e. it can
+primary metric, and (for eval/probe/causal) respects THE ONE RULE — i.e. it can
 be audited to confirm no coordinate entered the model. Add an assertion where
 cheap.
 
