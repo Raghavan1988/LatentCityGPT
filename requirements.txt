@@ -1,0 +1,21 @@
+# LatentCityGPT dependencies
+
+# data (CPU)
+osmnx>=2.0
+networkx>=3.0
+numpy>=1.24
+
+# model + training (GPU for training)
+torch>=2.1
+
+# eval / probe
+scikit-learn>=1.3      # ridge + MLP probes, metrics
+scipy>=1.10            # Procrustes alignment
+
+# viz / demo
+matplotlib>=3.7
+plotly>=5.18           # optional, interactive overlays
+streamlit>=1.30        # optional, demo UI
+
+# misc
+tqdm>=4.66
