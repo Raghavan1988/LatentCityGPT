@@ -31,12 +31,13 @@ N_RESERVED = 3
 # ---------------------------------------------------------------------------
 # 1. Get the city graph
 # ---------------------------------------------------------------------------
-def load_city_graph(place: str) -> nx.MultiDiGraph:
+def load_city_graph(place) -> nx.MultiDiGraph:
     """Pull a drivable street network from OpenStreetMap via OSMnx.
 
-    Returns a directed multigraph: nodes carry y/x (lat/lon), edges carry length.
-    Imported lazily so the rest of the pipeline (and the smoke test) runs without
-    network access.
+    `place` may be a single name (str) or a list of names (e.g. several adjacent
+    municipalities) — OSMnx unions them into one graph. Returns a directed
+    multigraph: nodes carry y/x (lat/lon), edges carry length. Imported lazily so
+    the rest of the pipeline (and the smoke test) runs without network access.
     """
     import osmnx as ox
     G = ox.graph_from_place(place, network_type="drive")
@@ -218,7 +219,8 @@ def dump(out_dir, train, val, gen, stoi, itos, vocab_size, G):
 # ---------------------------------------------------------------------------
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--place", default="Cambridge, Massachusetts, USA")
+    p.add_argument("--place", nargs="+", default=["Cambridge, Massachusetts, USA"],
+                   help="one or more OSM place names; multiple names are unioned into one graph")
     p.add_argument("--out_dir", default="data/city")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--holdout_frac", type=float, default=0.10,
@@ -234,8 +236,9 @@ def main():
 
     rng = random.Random(args.seed)
 
-    print(f"[1/6] pulling {args.place} from OpenStreetMap ...")
-    G = load_city_graph(args.place)
+    places = args.place if len(args.place) > 1 else args.place[0]
+    print(f"[1/6] pulling {places} from OpenStreetMap ...")
+    G = load_city_graph(places)
     print(f"[2/6] restricting to largest SCC ...")
     G = largest_scc(G)
     print(f"      {G.number_of_nodes():,} nodes / {G.number_of_edges():,} edges")
