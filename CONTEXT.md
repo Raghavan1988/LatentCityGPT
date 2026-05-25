@@ -1,148 +1,203 @@
-# CONTEXT.md — LatentCityGPT
+# CONTEXT.md — scientific framing after the 2026-05-24 pivot
 
-The full background. `CLAUDE.md` is the operational summary; this file is the
-"understand the project deeply before changing anything" document.
+`CLAUDE.md` is the operational summary; this file is "understand the project
+deeply before changing anything." Read alongside `pivot.md` (master plan for
+the pivot), `update_may24_final.md` (empirical narrative of the cities
+decomposition), and `STATUS_vs_OTHELLO-GPT.md` (claim-by-claim comparison to
+the literature).
 
-## The result we are proving
+---
 
-Train a decoder-only transformer on nothing but **sequences of intersection IDs**
-— routes through a real city — using ordinary next-token prediction. The model's
-inputs are arbitrary integers with no positional meaning. The claim:
+## The question this project asks (post-pivot)
 
-> A linearly-decodable **metric map** of the city emerges inside the model's
-> activations. A linear probe recovers each intersection's true (lat, lon) from
-> the residual stream with high R² and low median error in meters — despite the
-> model never having seen a coordinate. The map emerges from training (an
-> untrained net of the same architecture fails the probe), is encoded *linearly*,
-> and *causally* drives the model's routing.
+**Where do Othello-GPT-style emergent world representations actually appear in
+next-token transformers, and why?**
 
-This is **Othello-GPT** (Li et al.) transplanted from a synthetic board onto real
-geography. Othello-GPT showed an emergent board state recoverable by a probe;
-LatentCityGPT shows an emergent *map*. The substrate matters: real geography
-provides an objective metric ground truth (latitude/longitude in meters) against
-which the recovered representation can be measured directly, and the methodology
-sits in an established interpretability lineage.
+Othello-GPT (Li et al. 2022) showed that a transformer trained on Othello move
+sequences encodes the board state in its residual stream; Nanda 2023 sharpened
+the claim to linearly-decodable + causally-used. The lineage spawned a series
+of replications (Chess-GPT / Karvonen 2024 and others) without a systematic
+account of *when the result should and should not be expected*. This project
+attempts that account, with cities as the first studied domain.
 
-## Why this substrate
+---
 
-Goals, in priority order: (1) demonstrate deep model comprehension — not API
-fine-tuning, but mapping internal structure; (2) produce a result that is
-visually inspectable against an objective ground truth (recovered coordinates
-overlaid on the real street network); (3) relevance to work on spatial /
-world-model reasoning in transformers. Real geography is chosen over a synthetic
-maze because it grounds the recovered representation in a measurable metric
-space (meters of error). A synthetic-grid version is kept only as a
-**control/ablation** (you can dial structure up and down), not as a competing
-substrate.
+## What the cities domain established
 
-## Data representation
+The single-domain framing the project started with — "an emergent metric map
+of a real city appears in a next-token transformer trained on routes" — did
+*not* survive contact with the destroyed-structure control. What survived,
+and what was empirically established, is a richer decomposition:
 
-One training example = one **route**: a path through the street graph, e.g.
-intersections `42 -> 17 -> 18 -> 91 -> 305`, remapped to contiguous token indices
-and wrapped:
+### The three-condition causal gradient (cities, City of London)
 
-```
-sequence: [BOS, 45, 20, 21, 94, 308, EOS]
-input :   [BOS,  45,  20,  21,  94, 308]
-target:   [ 45,  20,  21,  94, 308, EOS]
-```
+Three trained models, same architecture, differing only in training data:
 
-Standard causal LM: every position predicts the next intersection. Many routes
-are packed into fixed-length blocks for efficiency, but conceptually each example
-is one journey. The corpus blends **length-weighted shortest paths** (realistic,
-goal-directed, keeps the model destination-aware over long routes) with **random
-walks** (cheap local coverage so quiet streets aren't starved).
+| Condition                | val ppl | P(A nbrs) | Probe R² (node-level lin.) | Transplant lift |
+|---|---:|---:|---:|---:|
+| Real London              | 1.65    | 0.984     | 0.64                       | **+0.953**      |
+| Within-route shuffled    | 25.0    | 0.061     | 0.96                       | +0.247          |
+| Global shuffled          | 313     | 0.006     | −0.02                      | +0.000 (chance) |
 
-The coordinate table is a *separate* file (`coords.csv`):
+Reading the table: training data with full geographic + ordered structure
+(real) produces both a strong probe signal and a strong causal effect of
+substituting `a_B` for `a_A`. Destroying only the *order* (within-route
+shuffle) preserves probe signal (in fact strengthens it) but reduces the
+causal effect ~4×. Destroying set-membership too (global shuffle) collapses
+both signals to the relevant null.
 
-```
-idx,lat,lon
-45,40.7128,-74.0060
-20,40.7135,-74.0051
-```
+### Two distinct phenomena, both causally encoded, with different sources
 
-**This separation is the entire integrity of the project** (see THE ONE RULE in
-`CLAUDE.md`). The tokenizer is a trivial bijection `osm_node_id <-> index`, with
-`0/1/2` reserved. One node = one atomic token. This is not just the simplest
-choice, it's the *required* one: tokenizing coordinate digits or turn-by-turn
-directions would inject positional info into the input and collapse the claim.
+The differential decomposes the model's causal use of its residual stream
+into two contributions:
 
-## How we evaluate (three layers)
+- **Geographic clustering** (~+0.247 of the transplant lift). Emerges from any
+  training signal with geographic co-occurrence — including a permutation-
+  invariant bag-of-tokens objective. Sequence order is *not* required.
+- **Graph-adjacency-using behavior** (~+0.706 of the lift). Requires sequence-
+  order training. Destroyed by within-route shuffle. The part that makes the
+  trained model a competent route model.
 
-1. **Perplexity / cross-entropy** on `val.bin` — basic "is it learning" signal.
-2. **Valid-edge rate** — the direct analogue of Othello-GPT's legal-move rate.
-   Take the model's greedy next-node prediction; check it's a real neighbor of the
-   current node in `graph.gpickle`. Extend to whole **generated routes**: sample
-   from a start node and confirm every consecutive pair is a real edge. A model
-   with no internal structure predicts globally-popular nodes and scores terribly;
-   a model that learned connectivity scores high. This is the progress curve.
-3. **Generalization** — valid-edge rate + perplexity on `gen.bin` (routes to
-   **held-out destinations**). High here = it generalized over geometry rather
-   than memorizing endpoints. Stronger variant: hold out a contiguous **sub-region**
-   (geographic split), not just scattered nodes — see PLAN Phase 2.
+Both are causally read out by activation transplantation. The clean
+methodological observation is that the standard probe-based test for
+"emergent world model" can confound these — a probe trained on
+geographically-clustered embeddings will succeed even on a model that has no
+graph-adjacency knowledge.
 
-None of these eval layers requires the coordinate table.
+---
 
-## The proof — and the trap
+## The reframed thesis (working hypothesis)
 
-**The trap:** the instinct is "LatentCityGPT beats baselines at next-node prediction."
-That is weak and partly false — a 1st-order Markov chain over the graph basically
-*is* the adjacency matrix, so it's genuinely competitive at next-node prediction.
-Staking the project on "my transformer predicts next nodes better than n-grams"
-wins narrowly, unconvincingly, and misses the point.
+> Emergent world representations in next-token transformers depend on three
+> structural properties of the training distribution:
+> - **(D) Discrete state** — so probes cannot lookup-memorize via
+>   continuous-target shortcuts.
+> - **(N) State necessary for next-token prediction** — so the model has no
+>   choice but to maintain it.
+> - **(¬L) State not reconstructible from sequence co-occurrence statistics
+>   alone** — so the probe signal cannot be an artefact of pairwise token
+>   statistics.
+>
+> We document one domain (cities) failing the third property cleanly, will
+> document a within-domain natural experiment (music: key/chord vs beat
+> probes) that isolates the third property under a fixed model, and additional
+> positive domains (synthetic algebraic, applied aviation, applied dialog)
+> that exhibit all three.
 
-**The actual contribution:** LatentCityGPT contains an emergent, linearly-decodable
-metric map, and the baselines structurally **cannot**. So run two separate
-comparisons with two different purposes:
+**Caveats** (per `pivot.md`):
 
-| Comparison | Baseline | What it establishes |
-|---|---|---|
-| Is it a competent route model? (sanity) | uniform random; unigram frequency; 1st/2nd-order Markov; same-size LSTM | LatentCityGPT matches/beats on perplexity and **long-range** coherence (Markov forgets the destination; LatentCityGPT stays goal-directed). This only *earns the right* to make the real claim. |
-| Does it hold a map? (**the contribution**) | the *same* LatentCityGPT architecture, **untrained / randomly initialized** | A linear probe recovers true coordinates far better from the trained model than the untrained one. The gap **is** the emergence — it came from learning, not from the probe's own capacity. |
+- The three criteria are not independent. Discrete-state often implies non-
+  leaky; necessity interacts with both. The cities-only data isolates ¬L
+  cleanly but does not separate D or N.
+- The thesis is *consistent with* the data, not *uniquely predicted by* it.
+  A narrower, more defensible framing — "the co-occurrence leak is the
+  dominant failure mode in spatially-structured corpora" — may end up being
+  the right paper-ready version. Decision after Milestone 2 (music).
+- Reviewer pressure may force dropping D from the framing (since the cities
+  continuous-target issue is a probe-methodology problem, not a domain
+  property) and presenting only N and ¬L.
 
-Stack three controls to make the contribution airtight:
+---
 
-- **Probe-capacity control** — probe the raw token embeddings / IDs alone.
-  They're arbitrary integers, so coordinate R² should be near zero. Proves the
-  geometry lives in the deep representation, not the input.
-- **Linear-vs-nonlinear** — if a linear probe nearly matches an MLP probe, the
-  map is encoded *linearly* (the strong, lab-relevant claim), not merely "in there
-  somewhere."
-- **Destroyed-structure** — train an identical LatentCityGPT on routes where node
-  identities are shuffled so adjacency is meaningless. The probe should now fail.
-  Proves the recovered map comes from the real graph's structure, not probe overfit.
+## Methodology (the load-bearing parts)
 
-**The closer (correlation -> causation):** activation patching. Patch the residual
-direction encoding "I'm at node B" while the model is actually at node A, and show
-its next-hop distribution swings toward B's neighbors. A model whose predictions
-bend when you edit its internal sense of location is unambiguously *using* a world
-model.
+### Probe with both position-level AND node-level splits
 
-## Primary metrics & the visual demonstration
+The standard probe protocol — train on 80 % of positions, test on the other
+20 % — is *insufficient* in continuous-target settings with few unique tokens
+(~10³). Both linear and MLP probes can pass position-level via per-token
+lookup memorization. The node-level split (train on 80 % of unique token
+IDs, test on the disjoint 20 %) is the probe-capacity-controlled version
+and gives the honest signal. Run both; report both. The cities probe.py
+implements this.
 
-Report coordinate **R²**, **median reconstruction error in meters**, and a
-**Procrustes-aligned overlay** of recovered vs. true intersection positions. The
-overlay is the visual demonstration of the result: a side-by-side rendering of
-what the probe extracted from the model's internals against the city's actual
-geometry, so a reader can verify the metric correspondence directly.
+### Two-tier destroyed-structure control
 
-## The honest one-line claim
+A *single* destroyed-structure control is not enough. Within-sequence
+shuffles preserve set-membership co-occurrence, which itself carries the
+signal a probe will find on geographically-structured data. A *strict*
+control (global token shuffle across the entire stream) is needed to
+disentangle. Cities `data/prepare_city.py` has both `--shuffle_routes` (weak)
+and `--shuffle_globally` (strict); the per-domain template should provide
+both.
 
-> LatentCityGPT is at least as good a route model as strong sequence baselines, and
-> uniquely among them it builds an internal metric map of the city that emerged
-> from training, is encoded linearly, and causally drives its predictions.
+### Activation transplant, not pseudoinverse-direction patching
 
-## Budget & infra
+The Nanda-style "compute a residual direction encoding world-state and patch
+in target-direction" intervention is, in our setting, contaminated: the
+pseudoinverse-derived direction depends on the probe's geometry, and a probe
+trained on geographically-clustered activations finds a direction in any
+such model — including a destroyed-structure model that demonstrably cannot
+route. The corrected intervention substitutes a *real* residual `a_B` from a
+position where the model genuinely processes B for the residual `a_A` at a
+position where it processes A; the model's own representation is used, not
+the probe's. `eval/transplant.py` implements this.
 
-- **Data:** $0, CPU-only (OSMnx + networkx).
-- **Training:** ~$50–150. A ~10–30M-param nanoGPT trains on a single rented
-  A100/H100 (RunPod / Lambda) in well under 48h. Start with a small city
-  (Cambridge / one borough) — don't size by vibes.
-- **Hosting:** weights on Hugging Face (free); interactive demo on Streamlit /
-  Vercel.
+### `wte` vs an off-the-shelf graph embedding
 
-## Reference
+When a probe succeeds on a learned token embedding, a natural reviewer
+question is "is this just node2vec (or word2vec on graph walks)?". Cities
+`eval/embedding_compare.py` answers this directly: Procrustes alignment +
+linear CKA + probe parity. The cities result: `wte` is NOT a node2vec
+embedding (similarity to random matrix is comparable); a pure node2vec on
+the bare graph achieves *stronger* probe R² than `wte`. The geographic
+signal we found is not in the input embedding; it is built by the
+transformer's higher layers. This comparison should be reproduced
+per-domain where a natural off-the-shelf embedding exists.
 
-- Li et al., "Emergent World Representations: ... Othello-GPT" — the template for
-  the probe + control + causal-intervention methodology.
-- Karpathy, nanoGPT — the model/training scaffold to stay close to.
+---
+
+## Per-domain template (used by every milestone in PLAN.md)
+
+For each new domain in Phase 6:
+
+1. **Pipeline.** `data/prepare_<domain>.py` that produces the same
+   `train/val/gen.bin` + `meta.pkl` + per-domain ground-truth files
+   (analogue of `coords.csv` and `graph.gpickle`). Two destroyed-structure
+   flags (weak + strict).
+2. **Train.** Reuse `model/train.py` with the existing small/medium configs.
+3. **Intrinsic eval.** Reuse `eval/valid_edge.py` and `eval/baselines.py`
+   patterns; replace the city-specific scoring with the domain's primary
+   metric.
+4. **Probe.** Reuse `eval/probe.py` unchanged; choose the probe target from
+   the domain's ground-truth labels.
+5. **Activation transplant.** Reuse `eval/transplant.py` unchanged.
+6. **Embedding comparison.** Run `eval/embedding_compare.py` (or its
+   per-domain analogue) against the natural baseline embedding for the
+   domain.
+
+THE PER-DOMAIN ONE RULE: no probe-target value may appear in the model's
+input. For cities this is "no coordinates"; for music "no key signature
+explicit in the token stream"; for dialog "no slot-value labels"; etc.
+
+---
+
+## What competing baselines establish (the "earn the right" gate)
+
+For each domain, the model must first match or beat domain-appropriate
+sequence baselines on next-token prediction. Beating baselines on the
+*primary* task doesn't establish the world-model claim — that requires the
+probe + transplant gradient — but it earns the right to make the claim by
+showing the model is doing real work. Cities established this against 1st-
+and 2nd-order Markov on the real graph + long-range coherence.
+
+---
+
+## Definition of done (project)
+
+See PLAN.md's "Definition of done" — at least 4 domains, the predictive
+characterisation (D, N, ¬L or a tightened version), and the methodological
+caveats demonstrated cleanly.
+
+---
+
+## References
+
+- Li, K., Hopkins, A. K., Bau, D., Viégas, F., Pfister, H., Wattenberg, M.
+  (2022). *Emergent World Representations: Exploring a Sequence Model
+  Trained on a Synthetic Task* — Othello-GPT.
+- Nanda, N. (2023). *Actually, Othello-GPT Has a Linear Emergent World
+  Representation* — the linear-encoding sharpening.
+- Karvonen, A. (2024). *Emergent World Models and Latent Variable Estimation
+  in Chess-Playing Language Models* — Chess-GPT, the closest replication.
+- Karpathy, A. *nanoGPT* — the model + training scaffold.
