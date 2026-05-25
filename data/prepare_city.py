@@ -115,21 +115,51 @@ def encode(route, stoi):
 
 
 def shuffle_route_interior(route, rng):
-    """Phase 4 destroyed-structure control: keep the set of nodes in the route
-    unchanged (so unigram statistics are preserved), but randomly permute their
-    order so that adjacent tokens are NO LONGER neighbors in the graph.
+    """Phase 4 destroyed-structure control (weak version): keep the set of
+    nodes in each route unchanged (so unigram + route-set co-occurrence is
+    preserved), but randomly permute their order so that adjacent tokens are
+    NO LONGER neighbors in the graph.
 
-    A model trained on these shuffled routes cannot learn the real graph's
-    adjacency from sequential ordering. If a probe still recovers (lat, lon)
-    from its activations, the geometry came from token-frequency artifacts
-    rather than graph structure. Used by eval/probe.py and eval/causal.py
-    as a negative control.
+    NOTE: this turned out to be insufficient as a destroyed-structure control
+    on real cities. Set-membership co-occurrence within a route is itself
+    geographically coherent (a real route from A to B traverses a specific
+    neighborhood), so a model trained on these shuffled routes still learns
+    geographically-clustered embeddings via bag-of-tokens statistics. Use
+    `shuffle_real_tokens_globally` (with the `--shuffle_globally` flag) for
+    a stricter control that also breaks set-membership.
     """
     if len(route) <= 2:
         return route
     middle = list(route[1:-1])
     rng.shuffle(middle)
     return [route[0], *middle, route[-1]]
+
+
+def shuffle_real_tokens_globally(tokens, rng):
+    """Phase 4 destroyed-structure control (strict version): randomly permute
+    every real-token position across the ENTIRE stream of `tokens`, keeping
+    BOS/EOS/PAD positions in place.
+
+    Effect:
+      - Per-token (unigram) marginals preserved.
+      - Route SET-membership co-occurrence destroyed (route boundaries still
+        exist but the tokens within them no longer correspond to a real
+        geographically-coherent neighborhood).
+      - Graph adjacency destroyed (was destroyed by within-route shuffle too).
+
+    Predicted result: a model trained on this should NOT produce
+    geographically-decodable activations, because there is no consistent
+    relationship between which tokens co-occur and their geographic
+    proximity. This is the destroyed-structure control PLAN.md Phase 4
+    originally intended.
+    """
+    real_positions = [i for i, t in enumerate(tokens) if t >= N_RESERVED]
+    real_values = [tokens[i] for i in real_positions]
+    rng.shuffle(real_values)
+    out = list(tokens)
+    for pos, val in zip(real_positions, real_values):
+        out[pos] = val
+    return out
 
 
 def generate_corpus(G, stoi, train_dests, heldout, args, rng):
@@ -257,12 +287,19 @@ def main():
     p.add_argument("--min_len", type=int, default=4)
     p.add_argument("--val_frac", type=float, default=0.05)
     p.add_argument("--shuffle_routes", action="store_true",
-                   help="Phase 4 destroyed-structure control: randomly permute "
-                        "the interior tokens of every route (real walks become "
-                        "random permutations of the same nodes). Adjacency "
-                        "in the data no longer corresponds to graph edges. A "
-                        "model trained on this should produce activations from "
-                        "which (lat, lon) is NOT linearly decodable.")
+                   help="Phase 4 destroyed-structure control (weak): randomly "
+                        "permute interior tokens of every route. Set-membership "
+                        "preserved; only ordered adjacency destroyed. Empirically "
+                        "insufficient on real cities — within-route shuffle still "
+                        "produces geographically-decodable activations because "
+                        "set-membership in routes is itself geographic. Use "
+                        "--shuffle_globally for the strict version.")
+    p.add_argument("--shuffle_globally", action="store_true",
+                   help="Phase 4 destroyed-structure control (strict): after "
+                        "generation, randomly permute every real-token position "
+                        "across the ENTIRE stream. Breaks both ordered adjacency "
+                        "and route SET-membership co-occurrence. Predicted to "
+                        "make the probe finally fail at recovering geography.")
     args = p.parse_args()
 
     rng = random.Random(args.seed)
@@ -281,6 +318,11 @@ def main():
     print(f"      {len(train_dests):,} train dests / {len(heldout):,} held out")
     print(f"[5/6] generating routes ...")
     train, val, gen = generate_corpus(G, stoi, train_dests, heldout, args, rng)
+    if args.shuffle_globally:
+        print(f"[5b/6] applying GLOBAL real-token shuffle (destroyed-structure strict) ...")
+        train = shuffle_real_tokens_globally(train, rng)
+        val   = shuffle_real_tokens_globally(val,   rng)
+        gen   = shuffle_real_tokens_globally(gen,   rng)
     print(f"[6/6] writing to {args.out_dir} ...")
     dtype = dump(args.out_dir, train, val, gen, stoi, itos, vocab_size, G)
 
