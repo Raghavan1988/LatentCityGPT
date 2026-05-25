@@ -217,7 +217,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# LatentCityGPT — local-only artifacts
+# LatentWorldsGPT — local-only artifacts
 original_chat.txt
 checkpoints/
 # generated dataset outputs under data/<city>/
