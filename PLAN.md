@@ -153,20 +153,28 @@ expected.
 
 ### Milestone 2 — Music: three load-bearing probes, three independent bets
 
-**Status (2026-05-25 + 2026-05-26):** First-pass + heavy-probe followup
-DONE. See `updateMay25.md` and `updateMay26.md`. Headlines after both
-sessions:
+**Status (2026-05-25 + 2026-05-26, post-correction):** First-pass +
+heavy-probe followup + correction DONE. See `updateMay25.md` and
+`updateMay26.md` (which has a § Correction section). Headlines after
+all three:
 - **Voice-leading gradient is the load-bearing positive** (96.25% / 64.33%
   / 55.91% strict, real / within / global) — the cities valid-edge
-  analog.
-- **Cities-style reversal replicates** — within-shuffled model has HIGHER
-  beat-probe PIECE-LEVEL accuracy than real model (MLP 42% vs 33%).
+  analog. Robust.
 - **Mode probe is pure lexical artifact** — trained ≈ untrained across all
-  three conditions; the original "60% cities-analogue leak" claim was a
-  random-embedding artifact, not a learned signal.
-- **Joint outcome A (predicted mixed verdict) does NOT land.** The
-  observed pattern is closer to "two-domain methodology cautionary tale"
-  than to any of the four pivot.md outcomes.
+  three conditions; the original "60% cities-analogue leak" claim from
+  updateMay25 was a random-embedding artifact, not a learned signal.
+  Robust.
+- **Beat probe sits at chance (~28–32%) in all conditions** with trained
+  ≈ untrained on PIECE-LEVEL. Robust across multi-seed.
+- **The "cities-style reversal in music" claim from updateMay26 is
+  RETRACTED.** It was a single-seed × max-across-layers artifact;
+  multi-seed verification (3 light seeds + 1 heavy seed) shows the
+  within-shuffled model does NOT have a higher beat probe than the
+  real model.
+- **Joint outcome A (predicted mixed verdict) does NOT land.** Honest
+  framing: cities-style methodology cautionary tale stands on its own
+  in cities; music gives a clean voice-leading gradient + confirms
+  mode-as-lexical-artifact, but does NOT replicate the cities reversal.
 
 **Effort:** 2–3 days. Highest scientific value per day in the portfolio.
 - `data/prepare_music.py` using `music21` Bach chorales.

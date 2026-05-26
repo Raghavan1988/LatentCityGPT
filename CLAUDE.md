@@ -149,10 +149,15 @@ cheap.
       methodology calibration DONE (2026-05-25 → 2026-05-26).**
       See `updateMay25.md` for the M2 first-pass writeup and `updateMay26.md`
       for the heavy-probe + sym-group session that followed.
-      - **Cities-style reversal replicates in music**: within-piece-shuffled
-        model has HIGHER beat-probe PIECE-LEVEL accuracy than real model
-        (MLP 42% vs 33%). Mode probe is purely lexical (trained ≈ untrained
-        in all conditions). Same MLP-contamination shape as cities.
+      - **Mode probe is purely lexical (trained ≈ untrained in all conditions)**
+        — this finding is robust across the heavy probe.
+      - **Original "cities-style reversal" claim RETRACTED 2026-05-26 (later
+        in day).** The +8.7 pt within > real beat-probe gap was from
+        heavy probe at seed=0; reading max-across-7-layers as the
+        headline inflated apparent signal. Multi-seed verification
+        (lights seeds 1/2/3 + heavy seed=1) shows within ≤ real
+        consistently. The reversal does NOT replicate. See updateMay26.md
+        § Correction for the multi-seed table + methodology lesson.
       - **Sym-group methodology calibration inconclusive**: self-avoiding-walk
         task improved val_ppl (5.90 vs 6.82 uniform) but probe collapsed
         to lexical-only signal. Can't yet distinguish probe-code-broken vs
