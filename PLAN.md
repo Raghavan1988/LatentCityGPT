@@ -153,6 +153,15 @@ expected.
 
 ### Milestone 2 — Music: three load-bearing probes, three independent bets
 
+**Status (2026-05-25 + 2026-05-26 morning + 2026-05-26 afternoon):**
+First-pass + heavy-probe followup + retraction + expanded-corpus v2
+ALL DONE. See `updateMay26_afternoon.md` for the final clean picture.
+Headlines: voice-leading gradient (98.99/25.93/58.77 strict) is the
+load-bearing positive; all classification probes (beat, mode, chord)
+show trained ≈ untrained on PIECE-LEVEL under honest 4-seed reporting;
+diagnosis is "N criterion fails — next-pitch objective doesn't require
+beat/mode/chord encoding."
+
 **Status (2026-05-25 + 2026-05-26, post-correction):** First-pass +
 heavy-probe followup + correction DONE. See `updateMay25.md` and
 `updateMay26.md` (which has a § Correction section). Headlines after

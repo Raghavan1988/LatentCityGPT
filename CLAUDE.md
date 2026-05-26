@@ -150,14 +150,25 @@ cheap.
       See `updateMay25.md` for the M2 first-pass writeup and `updateMay26.md`
       for the heavy-probe + sym-group session that followed.
       - **Mode probe is purely lexical (trained ≈ untrained in all conditions)**
-        — this finding is robust across the heavy probe.
-      - **Original "cities-style reversal" claim RETRACTED 2026-05-26 (later
-        in day).** The +8.7 pt within > real beat-probe gap was from
-        heavy probe at seed=0; reading max-across-7-layers as the
-        headline inflated apparent signal. Multi-seed verification
-        (lights seeds 1/2/3 + heavy seed=1) shows within ≤ real
-        consistently. The reversal does NOT replicate. See updateMay26.md
-        § Correction for the multi-seed table + methodology lesson.
+        — robust across both Bach-only and expanded-corpus multi-seed runs.
+      - **Original "cities-style reversal" claim RETRACTED 2026-05-26.** See
+        `updateMay26.md` § Correction. The seed=0 anomaly was max-across-7-
+        layers inflation; multi-seed verification (lights seeds 1/2/3 +
+        heavy seed=1 + 4-seed honest probe on the expanded model) all show
+        within ≈ real on PIECE-LEVEL beat (chance 25%, both at ~26%).
+      - **M2 v2 with expanded corpus + smaller model (`updateMay26_afternoon.md`):**
+        - Corpus 6.8× larger (358k train tokens; bach + palestrina +
+          monteverdi + josquin); smaller model (1.4M params); no overfit.
+        - Voice-leading gradient: 98.99% / 25.93% / 58.77% strict (real /
+          within / global); cleanest comparable result.
+        - Honest 4-seed probe: beat at chance (~27%) in ALL conditions
+          with trained ≈ untrained. Mode at lexical baseline (~70% on
+          real/within with pitch set preserved, ~54% on global with set
+          destroyed). No classification probe lands as Othello-positive.
+        - Diagnosis: N criterion (state necessary for next-token
+          prediction) fails for beat/mode/chord in music — voice-leading
+          is locally predictable, model doesn't need to encode global
+          structural features.
       - **Sym-group methodology calibration inconclusive**: self-avoiding-walk
         task improved val_ppl (5.90 vs 6.82 uniform) but probe collapsed
         to lexical-only signal. Can't yet distinguish probe-code-broken vs
