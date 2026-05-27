@@ -4,7 +4,40 @@ This is a stock-take comparing the experiment's progress to the Othello-GPT line
 it is modeled on, and a calibrated prediction of what changes when we move from
 the current smoke-trained models to proper (medium-config, full-corpus) training.
 
-> **Update — 2026-05-26 late night (most recent).** Two follow-up
+> **Update — 2026-05-27 (most recent).** Multi-seed retrofit landed on
+> all 4 probe domains — `update_week1.md` has the full mean ± std
+> table. Two fixes underpin the new numbers:
+> (a) `eval/probe_othello.py`, `eval/probe_music.py`, `eval/probe_symgroup.py`,
+> `eval/probe_sanity.py` previously constructed a `GPT(config)` but never
+> called `load_state_dict(...)`, so the "trained" model was random-init
+> too. Comparisons under those scripts were uninformative.
+> (b) All 5 probe scripts now run an outermost seed loop that varies
+> untrained init, activation sampling, and probe-training RNG together;
+> headlines report best-layer-by-mean across 5 seeds.
+>
+> **The music story changes the most.** After Fix (a):
+> - **Beat remains at chance** (real piece-level gap +0.006 ± 0.0075).
+>   Principled N-criterion failure — confirmed.
+> - **Chord shows a clear positive signal** (real piece-level gap **+0.089
+>   ± 0.0202**, ≈ 3 σ separation). This collapses under within-shuffle
+>   (+0.018) and global-shuffle (+0.012) — chord behaves like a local
+>   structural feature.
+> - **Mode shows a small positive signal** (real piece-level gap +0.067).
+>   Within-shuffle preserves pitch-set and the within-shuffled model
+>   specializes harder on the lexical signal (gap +0.129).
+>
+> Cities (node-level, 3 cities), Othello (per-cell, 5 seeds), and flight
+> (flight-level, 3 conditions) all tighten inside the previously-reported
+> bands. Othello trained MLP at L4 = **0.9399 ± 0.0012**, matching the
+> published ~94 % within 0.01.
+>
+> **Updated 3-domain spectrum framing**: music isn't a uniform null —
+> it's a graded result where beat fails on N-criterion grounds while
+> chord shows the same shape as the cities/Othello positives, just at
+> lower absolute accuracy. The "Three points on the spectrum" table at
+> the end of this document is amended accordingly.
+
+> **Update — 2026-05-26 late night.** Two follow-up
 > diagnostics from `updateMay26_night.md`:
 > (a) **MLP-contamination caveat on cities is RESOLVED.** New
 > `eval/probe_cities_grid.py` reframes the cities probe target as
@@ -330,12 +363,19 @@ encoded → probe fails.
 
 ### Three points on the spectrum
 
-| Domain | Structural metric | Probe result | N-criterion verdict |
+| Domain | Structural metric | Probe result (multi-seed, honest split) | N-criterion verdict |
 |---|---:|---|---|
-| Cities (real London) | valid-edge 99.7 % | ✓ R² 0.64 node-level, +0.953 transplant lift (cities-specific MLP-contamination caveat applies) | Yes — graph adjacency needed |
-| **Othello (50k corpus, in-codebase)** | **valid-move 82.2 %** | **✓ MLP 91.19 %, LINEAR 77.15 %** (published range) | **Yes — board state needed for legal moves** |
-| Music (expanded corpus) | voice-leading 98.99 % | ✗ beat at chance, mode lexical (trained ≈ untrained) | No — voice-leading is locally predictable; doesn't need beat/mode/chord |
+| Cities (real London) | valid-edge 99.7 % | ✓ MLP 0.64 node-level (gap +0.55), +0.953 transplant lift | Yes — graph adjacency needed |
+| **Othello (50k corpus, in-codebase)** | **valid-move 82.2 %** | **✓ MLP 0.9399 ± 0.0012 at L4** (gap +0.34) | **Yes — board state needed for legal moves** |
+| Flight (ADS-B, real) | valid-physics 94 % | ✓ MLP 0.88 ± 0.08 flight-level (gap +0.10); monotonic 3-condition gradient | Partial — phase state needed for plausible next-bearing/altitude |
+| Music — chord (expanded) | voice-leading 99 % | ✓ MLP 0.30 ± 0.02 piece-level (gap +0.089, ≈ 3 σ); drops under shuffles | Yes — chord state correlates with local voice-leading |
+| Music — mode (expanded) | — | ◐ MLP 0.82 ± 0.02 piece-level (gap +0.067); lexically recoverable | Weak — pitch-set carries mode information directly |
+| Music — beat (expanded) | — | ✗ MLP 0.28 ± 0.01 piece-level (gap +0.006, within 1 σ of zero) | No — voice-leading is locally predictable from same-voice context |
 
-The 3-domain comparative story is now coherent and the codebase is
-triply validated. Workshop paper achievable; mainline paper achievable
-with one more positive control (M4 flight-phase, per `pivot.md`).
+The cross-domain comparative story is now: a model's residual stream
+encodes the abstract features that the next-token objective forces it to
+encode, and not the abstract features that are independent of that
+objective. Cities, Othello, flight, and music-chord all sit on the
+"forced by objective → encoded" side; music-beat is the clearest example
+of "independent of objective → not encoded." Music-mode is intermediate
+(lexically recoverable from the same input that determines next pitch).
