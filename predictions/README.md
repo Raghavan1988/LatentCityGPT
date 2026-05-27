@@ -27,8 +27,13 @@ outcome.
 - `README.md` — this file. The protocol description.
 - `predictions_TEMPLATE.md` — the template each new prediction file
   starts from.
-- `predictions_<tag>.md` — one file per ex-ante experiment. Examples
-  of `<tag>`: `w4_maze`, `w4_tcp_state`, `w4_code_exec`.
+- `predictions_<task>.md` — one file per ex-ante experiment. The
+  `<task>` slug describes the domain in plain English, not the
+  internal task ID. Examples: `predictions_maze_navigation.md`,
+  `predictions_tcp_state_recovery.md`,
+  `predictions_code_execution_traces.md`. A reader who has never seen
+  the project's internal milestone naming should be able to tell what
+  the experiment is about from the filename alone.
 
 ## The protocol
 

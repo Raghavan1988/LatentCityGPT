@@ -1,6 +1,6 @@
 # Predictions — <task tag>
 
-**Task tag**: `<short kebab-case identifier — e.g., w4_maze, w4_tcp_state>`
+**Task tag**: `<short kebab-case identifier describing the experiment in plain English — e.g., maze_navigation, tcp_state_recovery, code_execution_traces. Avoid internal milestone IDs like "w4_" or "phase3"; the filename should be readable years from now without project context.>`
 **Task description**: <one-paragraph description of the domain and the
 training corpus. Include: what the tokens are, what the next-token
 objective is, how destroyed-structure controls will be built.>

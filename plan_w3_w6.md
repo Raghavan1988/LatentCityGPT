@@ -24,7 +24,7 @@ ex-ante predictions for W4.
 
 | Task | What | ETA | Marginal value |
 |---|---|---|---|
-| W3-a | Pre-registration protocol setup. `predictions/` directory with README explaining the lockdown rules + confirm/falsify criteria, a `predictions_TEMPLATE.md` that future predictions copy from, and a worked `predictions_EXAMPLE.md`. ✓ DONE 2026-05-27. The W4 predictions file (`predictions_<tag>.md`) goes here in W4-b. | 2 h | +2-3% |
+| W3-a | Pre-registration protocol setup. `predictions/` directory with README explaining the lockdown rules + confirm/falsify criteria, a `predictions_TEMPLATE.md` that future predictions copy from, and a worked `predictions_EXAMPLE.md`. ✓ DONE 2026-05-27. The ex-ante predictions file lands in W4-b under a descriptive filename keyed to the experiment (`predictions_<task>.md`, e.g. `predictions_maze_navigation.md`). | 2 h | +2-3% |
 | W3-b | Othello championship-games retrain (Task 56). Replace 50k random uniform games with championship games; push trained MLP from 0.94 toward published 0.95+. | ~1 day training (GPU rental) | small (tightens a specific comparison) |
 | W3-c | Cities scale demonstration. Train one larger model (~50M params) on full Manhattan; show probe + transplant patterns persist at scale. | ~2-3 days GPU rental, $20-50 | +3-4% |
 | W3-d | **Direct Logit Attribution per-layer per-domain**. For each trained model, decompose the residual into per-component contributions to the logit for the correct next-move / next-pitch / next-phase token, summed at each layer. Output: `eval/dla.py` + `figs/week3_dla_per_domain.png` showing each layer's direct contribution to the valid-next-token logit. Pairs naturally with transplant (DLA = component-wise direct contribution, transplant = causal effect of replacement). | ½ day | +2% (adds a conventional complementary view) |
@@ -40,10 +40,10 @@ This is the highest-leverage single item in the W3-W6 plan.
 | Task | What | ETA | Marginal value |
 |---|---|---|---|
 | W4-a | Pick the target task. Candidates (decide later): TCP-state corpus, simple code-execution traces, maze-path corpus, MultiWOZ dialog state. Pick by: (1) probe target is unambiguous, (2) destroyed-structure controls are buildable, (3) training fits 1 day on MPS. | ½ day choosing | — |
-| W4-b | Write predictions to `predictions_w4.md`. For each chosen feature: predicted probe accuracy band, predicted gap-vs-untrained band, predicted per-layer peak location, predicted transplant lift band, expected destroyed-structure-control shape. Commit BEFORE any experiment runs. | ½ day | (zero alone; required for W4-c to count) |
+| W4-b | Write predictions to `predictions_<task>.md` (descriptive filename, e.g. `predictions_maze_navigation.md` — not `predictions_w4.md`). For each chosen feature: predicted probe accuracy band, predicted gap-vs-untrained band, predicted per-layer peak location, predicted transplant lift band, expected destroyed-structure-control shape. Commit BEFORE any experiment runs. | ½ day | (zero alone; required for W4-c to count) |
 | W4-c | Build data pipeline + train model (3 conditions: real, within-shuf, global-shuf). | 1-2 days | — |
 | W4-d | Run probe + transplant + per-layer ablation. Multi-seed protocol. | 1 day compute | — |
-| W4-e | Confirm/falsify table. For each prediction in `predictions_w4.md`: did the experiment confirm or falsify? If falsified, what does the failure imply for the N-criterion framework? | 1 day analysis + writeup | **+7-10%** |
+| W4-e | Confirm/falsify table. For each prediction in `predictions_<task>.md`, write the matching `results_<task>.md` recording: observed value, predicted band, verdict (✓ confirmed / ◐ ambiguous / ✗ falsified). If falsified, document what the failure implies for the N-criterion framework. | 1 day analysis + writeup | **+7-10%** |
 
 **Risk**: predictions may be wrong on something. That's not a failure
 mode — a falsified prediction is a more useful paper than a confirmed
