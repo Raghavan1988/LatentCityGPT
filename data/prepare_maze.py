@@ -245,6 +245,7 @@ def dump(out_dir, splits, side_rows, vocab_size, size, args):
         "vocab_size": vocab_size,
         "stoi": stoi,
         "itos": itos,
+        "dtype": np.dtype(dtype).name,
         "dtype_str": "uint16" if dtype == np.uint16 else "uint32",
         "n_grid": size,
         "domain": "maze_navigation",
