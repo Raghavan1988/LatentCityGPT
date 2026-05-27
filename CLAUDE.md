@@ -169,6 +169,22 @@ cheap.
           prediction) fails for beat/mode/chord in music — voice-leading
           is locally predictable, model doesn't need to encode global
           structural features.
+- [x] **Othello-GPT reproduced from scratch in this codebase
+      (2026-05-26 evening, `updateMay26_evening.md`).** End-to-end
+      validation that the framework finds learned features when N is
+      satisfied:
+      - 50k random uniform games → `data/othello_50k` (2.5M train
+        tokens) → medium_othello.py (4M params, no overfit).
+      - val_ppl 15.22, valid-move rate 82.2% (vs published ~95%+;
+        approaching).
+      - **3-class MLP probe: 91.19% per-cell mean (vs published
+        ~94%; within 3 pts)**. Trained−untrained gap +35.6 pts.
+      - **3-class LINEAR probe: 77.15%** (vs published 75-85%; in
+        range).
+      - Therefore: music null (probe at chance / lexical) is principled
+        N-criterion failure, not a framework bug.
+      - 3-domain comparative story now: cities + Othello (positive
+        controls, probe works) + music (N fails, probe doesn't work).
       - **Sym-group methodology calibration inconclusive**: self-avoiding-walk
         task improved val_ppl (5.90 vs 6.82 uniform) but probe collapsed
         to lexical-only signal. Can't yet distinguish probe-code-broken vs

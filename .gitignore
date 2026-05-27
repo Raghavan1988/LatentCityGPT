@@ -229,6 +229,7 @@ data/*/key.csv
 data/*/chord.csv
 data/*/beat.csv
 data/*/partial_product.csv
+data/*/board_state.csv
 
 # Claude Code cache and ad-hoc smoke outputs
 cache/
