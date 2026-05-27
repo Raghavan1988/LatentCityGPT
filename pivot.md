@@ -8,6 +8,22 @@ data-pipeline-level results; see the new section "Empirical results from
 the must-do experiments" below for the causal-intervention results that
 strengthen the pivot.
 
+> **Status update — 2026-05-26 night.** Cross-domain transplant
+> experiments completed (`updateMay26_night.md`): cities Manhattan +0.958
+> and Boston +0.877 alongside London +0.953 (consistent within domain);
+> music transplant new — real expanded model +0.804, within-shuffled
+> +0.071, global-shuffled −0.010 (clean 3-condition gradient mirroring
+> cities); Othello +0.108/+0.235. **Corrected cross-domain interpretation:
+> cities and music are TOKEN-LOCAL domains (transplant ~0.8-0.95);
+> Othello is PREFIX-DERIVED (transplant ~0.1-0.2). All three pass the
+> causal residual-encoding test qualitatively.** The pivot.md M2 within-
+> domain mixed verdict has landed — just on different feature targets
+> than originally hypothesized: music ENCODES voice-leading state
+> (transplant +0.804, causally used) but does NOT encode beat/mode/chord
+> (probe trained ≈ untrained). Same model, same framework, opposite
+> outcomes — cleanest possible empirical demonstration of the N criterion
+> as a diagnostic.
+
 > **Status update — 2026-05-26 evening.** Major progress beyond the
 > original plan. Music M2 first-pass + retraction + expanded-corpus v2
 > all done (`updateMay25.md`, `updateMay26.md`, `updateMay26_afternoon.md`).

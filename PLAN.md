@@ -1,5 +1,17 @@
 # PLAN.md — build plan after the 2026-05-24 pivot
 
+> **Status update — 2026-05-26 night (most recent).** Cross-domain
+> transplant experiments completed (`updateMay26_night.md`). The corrected
+> interpretation: cities + music are TOKEN-LOCAL (transplant lifts
+> ~0.8-0.95); Othello is PREFIX-DERIVED (transplant ~0.1-0.2). Music
+> transplant new (`eval/transplant_music.py`) — real +0.804 / within-
+> shuffled +0.071 / global-shuffled −0.010 (clean 3-condition gradient).
+> **Music's null on classification probes is now causally demonstrated
+> as principled N-criterion failure:** voice-leading IS encoded
+> (transplant works); beat/mode/chord are NOT encoded (probe at chance).
+> Same model + same framework + different feature targets = opposite
+> outcomes.
+
 > **Status update — 2026-05-26 evening.** Beyond the original plan we have
 > now reproduced **Othello-GPT from scratch in this codebase** as the
 > framework-validation positive control. See `updateMay26_evening.md`.

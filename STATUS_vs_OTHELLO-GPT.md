@@ -4,7 +4,23 @@ This is a stock-take comparing the experiment's progress to the Othello-GPT line
 it is modeled on, and a calibrated prediction of what changes when we move from
 the current smoke-trained models to proper (medium-config, full-corpus) training.
 
-> **Update — 2026-05-26 evening (most recent).** Othello-GPT has now been
+> **Update — 2026-05-26 night (most recent).** Cross-domain transplant
+> experiments completed — see `updateMay26_night.md`. The cross-domain
+> picture is now: **cities + music are token-local domains** (transplant
+> nearly fully replaces predictions, lifts +0.80 to +0.96); **Othello is
+> prefix-derived** (transplant captures ~20 % of the maximum effect
+> because board state is computed from prior moves via attention, not
+> stored locally in the current residual). Cities Manhattan +0.958 /
+> Boston +0.877 confirm within-cities consistency. Music transplant new
+> (`eval/transplant_music.py`, voice-leading state): real +0.804,
+> within-shuffled +0.071, global-shuffled −0.010 — clean 3-condition
+> gradient. **The music null on classification probes is now causally
+> demonstrated as principled:** voice-leading IS encoded and causally
+> used (transplant +0.804); beat/mode/chord are NOT encoded (probe
+> trained ≈ untrained). Same model, same framework — opposite outcomes
+> explained by the next-pitch objective's requirements.
+
+> **Update — 2026-05-26 evening.** Othello-GPT has now been
 > **directly reproduced in this codebase** from scratch — see
 > `updateMay26_evening.md` for the full session narrative. Trained on 50k
 > random uniform games (medium_othello.py, ~4M params, no overfit), the

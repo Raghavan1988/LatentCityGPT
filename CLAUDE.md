@@ -169,6 +169,22 @@ cheap.
           prediction) fails for beat/mode/chord in music — voice-leading
           is locally predictable, model doesn't need to encode global
           structural features.
+- [x] **Cross-domain transplant gradient + corrected interpretation
+      (2026-05-26 night, `updateMay26_night.md`).** Triggered by user's
+      diagnostic worry "how confident are we cities ≠ Othello?". Ran:
+      cities transplant on Manhattan + Boston (both ~+0.9, similar to
+      London +0.953); music transplant new (`eval/transplant_music.py`,
+      voice-leading state) → real +0.804, within-shuffled +0.071,
+      global-shuffled −0.010 — clean 3-condition gradient mirroring
+      cities. **The corrected interpretation: cities + music are
+      token-local domains (transplant ~0.9); Othello is prefix-derived
+      (transplant ~0.1-0.2). All three pass the causal residual-
+      encoding test qualitatively.** Music's null on beat/mode/chord
+      probes is now causally demonstrated as principled N-criterion
+      failure: voice-leading IS encoded (transplant +0.804), beat/mode/
+      chord are NOT encoded (probes trained ≈ untrained). Same model,
+      same framework, different feature targets, opposite outcomes —
+      cleanly explained by the next-pitch objective's requirements.
 - [x] **Othello-GPT reproduced from scratch in this codebase
       (2026-05-26 evening, `updateMay26_evening.md`).** End-to-end
       validation that the framework finds learned features when N is
