@@ -400,3 +400,49 @@ with Othello specifically reproduced in this codebase to settle the
   reproduction adds.
 - `next_steps.md` — short concrete plan for the experiments that were run
   during the pivot session.
+
+---
+
+## Rigor pass — Phase 1 + Phase 2 status (2026-05-27)
+
+This is a SEPARATE numbering from the original "Phase 0-5" build phases
+above. The rigor pass is a cross-cutting series of milestones applied
+to all 4 domains (cities, Othello, flight, music) to bring the existing
+results to publication-ready rigor:
+
+- **Rigor pass Phase 1 — probe rigor — DONE.** See `update_phase1.md`.
+  Multi-seed retrofit of all probe scripts; fix of a `load_state_dict`
+  bug that affected `eval/probe_othello.py`, `eval/probe_music.py`,
+  `eval/probe_symgroup.py`, and `eval/probe_sanity.py`. All probe
+  numbers now reported as mean ± std over 5 seeds on honest splits.
+  Per-layer ablation figures at `figs/phase1_*_per_layer.png`.
+
+- **Rigor pass Phase 2 — causal rigor + linear-encoding + symgroup
+  methodology — ~95 % done.** See `update_phase2.md`. Transplant
+  retrofit to multi-seed completed; per-layer transplant ablation
+  completed (245 of 245 runs); linear-vs-MLP table compiled across
+  all 4 domains (Nanda's strong claim holds, gap ≤ 0.13 on positive
+  conditions). Symgroup multi-seed at parity is the last remaining
+  unit and is currently running.
+
+- **Rigor pass Phase 3 — sharpen + complementary causal-interp —
+  partially done.** Phase 3-a (pre-registration protocol at
+  `predictions/`) committed; Phase 3-d/e/f scripts (`eval/dla.py`,
+  `eval/logit_lens.py`, `eval/zero_ablation.py`) drafted, awaiting run
+  after Phase 2 closes. Phase 3-b (Othello championship retrain) and
+  Phase 3-c (cities scale demo) pending.
+
+- **Rigor pass Phase 4 — ex-ante prediction experiment — LOCKED on
+  maze navigation.** See `predictions/predictions_maze_navigation.md`
+  (committed at `aa025b1`, append-only after lockdown). Data pipeline
+  `data/prepare_maze.py` written; 3 maze corpora generated
+  (`data/maze_8x8{,_within_shuffled,_global_shuffled}/`). Awaits
+  MPS availability post-Phase-2 for training.
+
+- **Rigor pass Phases 5–6 — writeup + final draft — not yet started.**
+  Phase 5-a (Procrustes-aligned cities map overlay) drafted at
+  `viz/overlay.py` and `figs/phase5_cities_overlay.png`.
+
+The full rigor-pass plan is at `plan_phases_3_6.md`. Phase 1 and 2
+writeups are at `update_phase1.md` and `update_phase2.md`.
+

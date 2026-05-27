@@ -239,3 +239,13 @@ cache/
 **/.claude/settings.local.json
 **/.claude/scheduled_tasks.lock
 .DS_Store
+
+# Maze probe side table (per-position labels, large)
+data/*/mazes.csv
+data/*/board_state.csv
+data/*/flight_phase.csv
+data/*/partial_product.csv
+data/*/chord.csv
+data/*/beat.csv
+data/*/key.csv
+data/*/mode.csv

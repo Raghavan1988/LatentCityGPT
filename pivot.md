@@ -8,6 +8,31 @@ data-pipeline-level results; see the new section "Empirical results from
 the must-do experiments" below for the causal-intervention results that
 strengthen the pivot.
 
+> **Status update — 2026-05-27 (most recent).** The "rigor pass" is
+> underway and has changed both the headline numbers and the framing.
+> See `update_phase1.md` and `update_phase2.md` for full detail.
+> Headlines:
+> - **Phase 1 (probe rigor) DONE.** All probe numbers now mean ± std
+>   over 5 seeds on honest splits. Fixed a `load_state_dict` bug
+>   affecting probe_othello / probe_music / probe_symgroup /
+>   probe_sanity that had been making "trained vs untrained"
+>   comparisons against two random-init models. After fix: cities
+>   node-level MLP 0.61–0.67 across 3 cities; Othello per-cell L4
+>   MLP 0.9399 ± 0.0012 (matches published ~94 % within 0.01); music
+>   chord shows a clear positive signal (gap +0.089 ~3σ) that the
+>   pre-fix run hid as null.
+> - **Phase 2 (causal rigor) ~95 % done.** Multi-seed transplant
+>   numbers; per-layer transplant ablation across all 4 domains;
+>   linear-vs-MLP table (gap ≤ 0.13 across positives → Nanda's strong
+>   claim holds cross-domain). Per-layer transplant shows the
+>   encoding-locality taxonomy at fine grain: cities peak shifts L3→L4→L5
+>   with vocab size, music shows a huge L0→L1 jump (+0.035 → +0.813)
+>   demonstrating transformer-computed (not embed-encoded) voice-leading.
+> - **Phase 4-a/b LOCKED on maze navigation** (`predictions/predictions_maze_navigation.md`,
+>   committed at `aa025b1`, append-only). Four ex-ante predictions including
+>   one risky NULL on starting-cell encoding. Maze pipeline + 3 corpora
+>   built; awaits MPS post-Phase-2 for training.
+
 > **Status update — 2026-05-26 night.** Cross-domain transplant
 > experiments completed (`updateMay26_night.md`): cities Manhattan +0.958
 > and Boston +0.877 alongside London +0.953 (consistent within domain);

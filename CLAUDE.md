@@ -258,3 +258,65 @@ cheap.
         and/or retrain with better-regularized config (~1 day); then revisit
         framing. Symmetric-group methodology calibration (Milestone 1) is
         now more attractive as an independent sanity check on the probe code.
+
+- [x] **Rigor pass — Phase 1 (probe rigor) COMPLETE (2026-05-27,
+      `update_phase1.md`).** Multi-seed retrofit of all probe scripts
+      (cities, Othello, flight, music) + fix of a `load_state_dict` bug
+      in 4 scripts that had been making "trained" and "untrained"
+      comparisons against two random-init models. Headlines (mean ± std
+      over 5 seeds, honest split):
+      - Cities node-level MLP: London 0.64, Manhattan 0.61, Boston 0.67
+        (gap +0.51 to +0.55 over untrained).
+      - Othello per-cell MLP at L4: **0.9399 ± 0.0012** (matches
+        published ~94% within 0.01).
+      - Flight phase MLP flight-level: 0.88 / 0.68 / 0.38 across the
+        3 conditions; clean monotonic gradient.
+      - Music: chord shows clear positive signal (gap +0.089 ~ 3σ); mode
+        lexically recoverable; **beat null** (gap +0.006 within 1σ of zero) —
+        principled N-criterion failure confirmed at multi-seed rigor.
+
+- [x] **Rigor pass — Phase 2 (causal rigor + linear-encoding +
+      symgroup methodology) ~95% complete (2026-05-27,
+      `update_phase2.md`).** Per-condition transplant numbers retrofitted
+      to mean ± std over 5 seeds, per-layer transplant ablation complete
+      across all 4 domains, linear-vs-MLP table done. Symgroup multi-seed
+      run still in progress (sa variant done; sa_within in progress;
+      sa_global queued). Headlines:
+      - Transplant lift over unpatched (5 seeds): cities London real
+        +0.937 ± 0.018 / within +0.259 ± 0.024 / global +0.000 ± 0.000;
+        Othello +0.108 ± 0.007; flight real +0.472 ± 0.057; music
+        voice-leading real +0.889 ± 0.007.
+      - Per-layer transplant peak: cities peak shifts deeper with
+        vocab size (London L3, Manhattan L4, Boston L5); Othello peak
+        at L3 (+0.296 — 2.7× the earlier L2 value); music shows huge
+        L0→L1 jump (+0.035 → +0.813 in real London — voice-leading is
+        **transformer-computed**, not embed-table-encoded).
+      - Linear-vs-MLP gap ≤ 0.13 across all positive (domain × condition)
+        pairs → Nanda's strong claim (linear encoding) holds.
+      - Symgroup methodology resolved: probe code sound (trained beats
+        untrained by +0.12 position / +0.05 word-level); task design
+        partial — does not hit the 0.9 threshold for "positive control"
+        status. Useful as a partial-signal data point, not a clean
+        positive.
+
+- [x] **Phase 3-a (pre-registration protocol) DONE; Phase 4-a/b LOCKED
+      (2026-05-27).** `predictions/` directory + protocol + EXAMPLE +
+      TEMPLATE committed. Phase 4 ex-ante task chosen: **maze
+      navigation** (risk-averse pick optimized for the cleanest possible
+      confirm/falsify table).
+      `predictions/predictions_maze_navigation.md` LOCKED at commit
+      `aa025b1` (audit trail via `git log --diff-filter=A`); maze data
+      pipeline (`data/prepare_maze.py`) committed and 3 corpora
+      generated. Awaits MPS availability post-symgroup to train models
+      and compare predictions to results.
+
+- [~] **Phase 3-d/e/f (DLA, logit lens, zero-ablation) scripts drafted;
+      runner queued.** `eval/dla.py` + `eval/logit_lens.py` +
+      `eval/zero_ablation.py` + `repro/phase3_complementary_interp.sh`.
+      Runs on existing W1+W2 checkpoints. To launch after Phase 2 closes.
+
+- [~] **Phase 5-a (Procrustes-aligned cities map) drafted.**
+      `viz/overlay.py` + `figs/phase5_cities_overlay.png`. First render
+      on existing London checkpoints reproduces the cities decomposition
+      story (real 213 m / within-shuffled 104 m / global-shuffled 444 m
+      median error). Iteration room remains for Phase 5 writeup.
