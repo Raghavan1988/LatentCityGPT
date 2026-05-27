@@ -230,6 +230,7 @@ data/*/chord.csv
 data/*/beat.csv
 data/*/partial_product.csv
 data/*/board_state.csv
+data/*/flight_phase.csv
 
 # Claude Code cache and ad-hoc smoke outputs
 cache/

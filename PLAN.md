@@ -1,6 +1,19 @@
 # PLAN.md — build plan after the 2026-05-24 pivot
 
-> **Status update — 2026-05-26 night (most recent).** Cross-domain
+> **Status update — 2026-05-27 (most recent).** Flight-phase
+> Milestone 4 landed (`updateMay27.md`). Applied positive control:
+> real ADS-B trajectories from `traffic` library, tokenized as discretized
+> (alt, vr, speed) bin-tuples, trained on 3-condition gradient.
+> Results: val_ppl 1.60 / 14.31 / 34.20; valid-physics 94 / 40 / 17 %;
+> phase probe FLIGHT-LEVEL linear trained-untrained gap +20 pts on real;
+> transplant P(B-phase) gain trp−rnd +0.460 with random-control symmetry.
+> Flight is now the 4th positive control (cities, Othello, music RSVP,
+> flight). It occupies the middle of the encoding-locality spectrum
+> (token-local cities/music ~+0.9 transplant; flight ~+0.46; prefix-
+> derived Othello ~+0.1). Mainline-paper threshold of 4 fully-tested
+> domains is met.
+
+> **Status update — 2026-05-26 night.** Cross-domain
 > transplant experiments completed (`updateMay26_night.md`). The corrected
 > interpretation: cities + music are TOKEN-LOCAL (transplant lifts
 > ~0.8-0.95); Othello is PREFIX-DERIVED (transplant ~0.1-0.2). Music

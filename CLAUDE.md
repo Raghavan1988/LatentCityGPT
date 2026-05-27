@@ -206,6 +206,20 @@ cheap.
       (grid vs per-cell) but qualify as mechanistically interpretable
       in the same shape. Music: principled N-criterion failure on
       abstract features; positive on RSVP.
+- [x] **Flight-phase Milestone 4 LANDED (2026-05-27, `updateMay27.md`).**
+      Applied positive control: real ADS-B from `traffic` library
+      (238 quickstart flights, 5s downsampled, 46k train tokens).
+      `data/prepare_adsb.py` + `model/configs/tiny_flight.py` (0.27M
+      params, 6:1 ratio, no overfit) + `eval/valid_flight_step.py` +
+      `eval/probe_flight.py` + `eval/transplant_flight.py`.
+      Results across 3 conditions (real / within / global):
+      val_ppl 1.60 / 14.31 / 34.20; valid-physics rate 94 / 40 / 17 %;
+      phase probe FLIGHT-LEVEL linear trained-untrained gap +20 / +12
+      / +14 pts; transplant P(B-phase) gain trp−rnd +0.460 / +0.306 /
+      +0.000. **Clean monotonic 3-condition gradient on all 4 metrics.**
+      Flight occupies the middle of the encoding-locality spectrum
+      (between token-local cities/music and prefix-derived Othello).
+      pivot.md M4 milestone complete.
 - [x] **Othello-GPT reproduced from scratch in this codebase
       (2026-05-26 evening, `updateMay26_evening.md`).** End-to-end
       validation that the framework finds learned features when N is
