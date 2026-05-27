@@ -24,7 +24,7 @@ ex-ante predictions for W4.
 
 | Task | What | ETA | Marginal value |
 |---|---|---|---|
-| W3-a | Pre-registration document. Create `predictions.md` listing, per upcoming W4 experiment, the exact prediction (probe accuracy band, layer-of-peak, transplant lift band) and the criterion for confirm/falsify. Timestamped, git-committed. Read-only after lockdown. | 2 h | +2-3% |
+| W3-a | Pre-registration protocol setup. `predictions/` directory with README explaining the lockdown rules + confirm/falsify criteria, a `predictions_TEMPLATE.md` that future predictions copy from, and a worked `predictions_EXAMPLE.md`. ✓ DONE 2026-05-27. The W4 predictions file (`predictions_<tag>.md`) goes here in W4-b. | 2 h | +2-3% |
 | W3-b | Othello championship-games retrain (Task 56). Replace 50k random uniform games with championship games; push trained MLP from 0.94 toward published 0.95+. | ~1 day training (GPU rental) | small (tightens a specific comparison) |
 | W3-c | Cities scale demonstration. Train one larger model (~50M params) on full Manhattan; show probe + transplant patterns persist at scale. | ~2-3 days GPU rental, $20-50 | +3-4% |
 | W3-d | **Direct Logit Attribution per-layer per-domain**. For each trained model, decompose the residual into per-component contributions to the logit for the correct next-move / next-pitch / next-phase token, summed at each layer. Output: `eval/dla.py` + `figs/week3_dla_per_domain.png` showing each layer's direct contribution to the valid-next-token logit. Pairs naturally with transplant (DLA = component-wise direct contribution, transplant = causal effect of replacement). | ½ day | +2% (adds a conventional complementary view) |
