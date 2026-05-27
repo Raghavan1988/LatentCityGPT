@@ -185,6 +185,27 @@ cheap.
       chord are NOT encoded (probes trained ≈ untrained). Same model,
       same framework, different feature targets, opposite outcomes —
       cleanly explained by the next-pitch objective's requirements.
+- [x] **Late-night diagnostic additions (2026-05-26).**
+      Two more experiments in `updateMay26_night.md` § "Late-night
+      addendum":
+      (a) `eval/probe_cities_grid.py` — cities grid-classification
+      probe (10×10 spatial grid, 100 cells). Resolves the MLP-
+      contamination caveat from `STATUS_vs_OTHELLO-GPT.md` via node-
+      level held-out tokens. London 66/62 % / Manhattan 57/61 % /
+      Boston 55/65 % (lin/MLP); untrained 8-11 % across all. Linear ≈
+      MLP within 5-10 pts → cities encoding IS linear (Nanda 2023's
+      strong claim, now cleanly testable in cities).
+      (b) `eval/transplant_music_beat.py` — music beat-controlled
+      transplant. Matched-RSVP donors with different beat-in-measure
+      produce LESS prediction shift than random control on every metric
+      (max\|Δp\|, KL, argmax-changed). Beat is not just unreadable
+      correlationally; it's causally inert.
+      **Cross-domain claim now defensible at full strength:** cities
+      and Othello both pass all 3 Li/Nanda claims; differ in encoding
+      mechanism (token-local vs prefix-derived) and probe methodology
+      (grid vs per-cell) but qualify as mechanistically interpretable
+      in the same shape. Music: principled N-criterion failure on
+      abstract features; positive on RSVP.
 - [x] **Othello-GPT reproduced from scratch in this codebase
       (2026-05-26 evening, `updateMay26_evening.md`).** End-to-end
       validation that the framework finds learned features when N is

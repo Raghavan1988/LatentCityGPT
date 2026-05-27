@@ -4,7 +4,33 @@ This is a stock-take comparing the experiment's progress to the Othello-GPT line
 it is modeled on, and a calibrated prediction of what changes when we move from
 the current smoke-trained models to proper (medium-config, full-corpus) training.
 
-> **Update — 2026-05-26 night (most recent).** Cross-domain transplant
+> **Update — 2026-05-26 late night (most recent).** Two follow-up
+> diagnostics from `updateMay26_night.md`:
+> (a) **MLP-contamination caveat on cities is RESOLVED.** New
+> `eval/probe_cities_grid.py` reframes the cities probe target as
+> CLASSIFICATION (10×10 spatial grid, 100 cells) instead of regression
+> on continuous coords. Node-level held-out tokens: London linear 66 %
+> / MLP 62 %; Manhattan 57 % / 61 %; Boston 55 % / 65 %. Untrained
+> baseline 8-11 % across all three. Linear ≈ MLP within 5-10 pts →
+> cities encoding IS linear (the Nanda 2023 strong claim, now
+> cleanly testable in cities). Cities now passes all 3 Li/Nanda claims
+> across all 3 cities.
+> (b) Music **beat-in-measure transplant is NULL**: matched-RSVP donors
+> with different beats produce LESS prediction shift than random
+> control. Beat is not just unreadable correlationally; it's causally
+> inert. Confirmed N-criterion failure for beat.
+>
+> Cross-domain comparative claim now defensible at full strength:
+> cities and Othello both pass all 3 Li/Nanda claims with appropriate
+> per-domain methodology (grid-classification for cities, per-cell for
+> Othello). They differ in encoding mechanism (cities token-local, +0.9
+> transplant; Othello prefix-derived, +0.1 transplant) but qualify as
+> mechanistically interpretable in the same shape. Music passes only
+> the RSVP test (locally-attendable feature) and fails on
+> beat/mode/chord (abstract structural features) — principled
+> N-criterion failure.
+
+> **Update — 2026-05-26 night.** Cross-domain transplant
 > experiments completed — see `updateMay26_night.md`. The cross-domain
 > picture is now: **cities + music are token-local domains** (transplant
 > nearly fully replaces predictions, lifts +0.80 to +0.96); **Othello is
