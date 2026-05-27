@@ -1,5 +1,16 @@
 # PLAN.md — build plan after the 2026-05-24 pivot
 
+> **Status update — 2026-05-26 evening.** Beyond the original plan we have
+> now reproduced **Othello-GPT from scratch in this codebase** as the
+> framework-validation positive control. See `updateMay26_evening.md`.
+> The plan didn't originally include this — Othello was supposed to be a
+> literature anchor (cite, don't reproduce) — but the user asked "are you
+> sure there's no bug?" after music's M2 first-pass, and the cleanest
+> answer was a from-scratch reproduction. Result: 3-class MLP probe 91.19 %
+> (vs published 94 %; within 3 pts), 3-class linear 77.15 % (in published
+> 75-85 % range). Framework validated. See "Phase 7: Othello-GPT in-codebase
+> reproduction (unplanned)" at the bottom for the build artifacts.
+
 The single-domain "Othello-GPT on cities" plan ran to completion and produced a
 decomposition result (see `update_may24_final.md` and `STATUS_vs_OTHELLO-GPT.md`).
 The project pivoted to a comparative study of where Othello-GPT-style results
@@ -282,13 +293,85 @@ See `pivot.md` for the risk register, confidence summary, and decision points.
 
 ---
 
+## Phase 7 — Othello-GPT in-codebase reproduction ✅ DONE (unplanned, 2026-05-26 evening)
+
+Triggered by the question "are you sure there's no bug?" after music's
+M2 first-pass. Original plan had Othello as a literature anchor (cite
+Li 2022 / Nanda 2023, don't reproduce). This phase added a from-scratch
+reproduction as the framework-validation positive control.
+
+### Build artifacts
+
+- `data/prepare_othello.py` — 8x8 Othello rules (placement, flips,
+  legal moves), random-uniform-play game generator, tokenizer (PAD/BOS/
+  EOS/PASS + 64 board cells = vocab 68), `board_state.csv` side table.
+- `tests/test_prepare_othello.py` — 8 offline tests; all pass.
+- `eval/valid_othello_move.py` — Othello analog of cities `valid_edge`
+  and music `valid_voice_step`: greedy next-token prediction vs the
+  set of legal Othello moves; reports LEGAL_MOVE / LEGAL_PASS /
+  ILLEGAL_PASS / ILLEGAL_MOVE / INVALID_TOKEN breakdown.
+- `eval/probe_othello.py` — per-cell board-state probe with
+  multi-formulation support (occupancy binary, B-vs-W on occupied =
+  Nanda formulation, 3-class empty/black/white).
+- `model/configs/small_othello.py` — block_size 128, eval_interval 100;
+  used for the initial 5k-game run (showed undertraining).
+- `model/configs/medium_othello.py` — n_embd=256, n_layer=4, n_head=4,
+  dropout=0.2, ~4M params. Sized for the 50k-games corpus; matches
+  the published Othello-GPT params:tokens ratio (~1.3). No overfit
+  through 5000 iters.
+
+### Corpora and checkpoints
+
+| Corpus | Games | Train tokens | Visits/token | Config | best val_ppl | Overfit? |
+|---|---:|---:|---:|---|---:|---|
+| `data/othello` | 5,000 | 250 k | 3,673 | small_othello.py (10.7 M) | 18.09 | Yes (after iter 700) |
+| `data/othello_50k` | **50,000** | **2.5 M** | **36,729** | medium_othello.py (4 M) | **15.22** | **No** (train/val/gen aligned within 3 % through 5000 iters) |
+
+### Probe results (50k corpus, the headline reproduction)
+
+| Probe formulation | TRAINED | UNTRAINED | Gap | Published target | Match? |
+|---|---:|---:|---:|---:|---|
+| **3-class MLP** | **91.19 %** | 55.59 % | **+35.60** | ~94 % (Li 2022) | **✓ Within 3 pts** |
+| **3-class LINEAR** | **77.15 %** | 52.54 % | **+24.61** | ~75-85 % (Li 2022) | **✓ In range** |
+| Occupancy LINEAR | **94.85 %** | 67.61 % | **+27.24** | n/a | ✓ Near-ceiling |
+| B-vs-W LINEAR (Nanda) | 69.90 % | 56.23 % | +13.67 | ~98 % (Nanda 2023) | Partial (needs more training) |
+
+Valid-move rate: **82.18 %** (vs published ~95 %+; substantial progress
+from the 5k run's 74.6 %).
+
+### Acceptance: met
+
+- 3-class MLP probe within 3 pts of published 94 %: ✅
+- 3-class linear probe in published 75-85 % range: ✅
+- Trained-vs-untrained gap > 20 pts on at least one formulation: ✅
+  (multiple — MLP +35.6, linear +24.6, occupancy +27.2)
+- Framework reliably finds learned features when N is satisfied: ✅
+
+### What this validates
+
+The codebase's full pipeline (model + training + activation extraction +
+classification probe + multi-seed honest reporting) reliably reproduces
+Othello-GPT's central result. The 3-domain comparative story now has
+two positive controls (cities, Othello) and one principled null (music),
+with Othello specifically reproduced in this codebase to settle the
+"is the framework sound?" question.
+
+---
+
 ## Pointers
 
 - `pivot.md` — master plan for the pivot; comprehensive milestones, risks,
   confidence summary.
 - `update_may24_final.md` — empirical narrative of the cities decomposition
   session.
+- `updateMay25.md` — music M2 first-pass.
+- `updateMay26.md` — heavy-probe sweep + sym-group methodology calibration
+  (with retraction banner for the cities-style-reversal claim).
+- `updateMay26_afternoon.md` — music M2 v2 (expanded corpus, smaller
+  model, honest reporting).
+- `updateMay26_evening.md` — Othello-GPT in-codebase reproduction.
 - `STATUS_vs_OTHELLO-GPT.md` — claim-by-claim comparison to the Othello-GPT
-  literature; what cities establishes.
+  literature; what cities establishes, and now what the Othello in-codebase
+  reproduction adds.
 - `next_steps.md` — short concrete plan for the experiments that were run
   during the pivot session.

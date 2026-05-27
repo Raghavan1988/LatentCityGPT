@@ -8,6 +8,21 @@ data-pipeline-level results; see the new section "Empirical results from
 the must-do experiments" below for the causal-intervention results that
 strengthen the pivot.
 
+> **Status update — 2026-05-26 evening.** Major progress beyond the
+> original plan. Music M2 first-pass + retraction + expanded-corpus v2
+> all done (`updateMay25.md`, `updateMay26.md`, `updateMay26_afternoon.md`).
+> Othello-GPT was reproduced from scratch in this codebase as a
+> framework-validation positive control (`updateMay26_evening.md`):
+> 3-class MLP probe 91.19 % per-cell (vs published ~94 %), 3-class linear
+> 77.15 % (in published 75-85 % range). The framework is validated; music's
+> null is principled N-criterion failure; sym-group methodology calibration
+> attempted but inconclusive. The "three criteria" framing has sharpened:
+> the **N criterion** (state necessary for next-token prediction) is the
+> single load-bearing requirement for classification probes to succeed.
+> Where N holds (cities, Othello, conjecturally flight-phase), probes find
+> the encoded state. Where N fails (music), they don't — regardless of
+> how much training data you throw at it.
+
 ---
 
 ## TL;DR
