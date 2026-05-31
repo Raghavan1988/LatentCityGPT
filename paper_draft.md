@@ -623,6 +623,20 @@ probe-based work should control for.
 §5.7 and §5.8 give the full empirical detail for Steps 1 through 6. §6 and
 §7 interpret the arc.
 
+A flowchart version of this same arc, with commit hashes and gap numbers
+inline, is in [`figures/01_experimental_arc.md`](figures/01_experimental_arc.md)
+(renders directly on GitHub via Mermaid). Readers who prefer to see the
+scientific timeline at a glance before reading the experimental sections
+may find it useful. A color-coded outcome matrix across all
+(domain, feature, condition) cells is in
+[`figures/02_results_matrix.md`](figures/02_results_matrix.md). A per-layer
+ablation chart showing where each (domain, feature) representation lives
+across transformer depth is in
+[`figures/03_per_layer_ablation.png`](figures/03_per_layer_ablation.png).
+A cross-condition gradient chart showing the real, within-shuffled, and
+global-shuffled gaps side by side is in
+[`figures/04_cross_condition_gradient.png`](figures/04_cross_condition_gradient.png).
+
 ---
 
 ## 5 Current Research: Cross-Domain Evidence
@@ -634,6 +648,24 @@ negative pair within a single domain). We treat cities separately in §5.3
 because the cities domain has a subtle confound that makes it less
 informative than it first appears. Sections §5.7 and §5.8 cover the two
 pre-registered ex-ante tests.
+
+![Per-layer ablation](figures/03_per_layer_ablation.png)
+
+**Figure 3** (above): Per-layer ablation across the six (domain, feature)
+pairs reported in this section. Othello and music are shown via causal
+transplant lift; maze starting cell and HTTP Features A and B are shown
+via probe gap. The bottom-right panel is the HTTP Feature B probe at
+fixed position k=5 (Design A, §5.8.4), showing the trained and untrained
+accuracy lines separately rather than the gap.
+
+![Cross-condition gradient](figures/04_cross_condition_gradient.png)
+
+**Figure 4** (above): Real / within-shuffled / global-shuffled gap
+comparison across six (domain, feature) pairs. The framework's
+destroyed-structure prediction is real > within > global. The note below
+each panel indicates whether the prediction holds (cities London,
+maze starting cell, and Feature A all deviate from monotonicity in
+revealing ways discussed in the corresponding sections).
 
 ### 5.1 Othello (independent reproduction of the prior literature)
 
