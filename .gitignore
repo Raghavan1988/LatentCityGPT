@@ -249,3 +249,12 @@ data/*/chord.csv
 data/*/beat.csv
 data/*/key.csv
 data/*/mode.csv
+
+# HTTP corpora (raw archives + generated state tables; regenerate via data/prepare_http.py)
+data/nasa_http/
+data/nasa_http_raw/
+data/nasa_http_within_shuffled/
+data/nasa_http_global_shuffled/
+
+# Superseded placeholder drafts
+results_http_log_sequences_DRAFT.md

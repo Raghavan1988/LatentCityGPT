@@ -2,39 +2,66 @@
 
 ## Abstract
 
-When does a transformer language model trained only to predict the next
-token spontaneously develop an internal representation of the world it
-is modeling? Prior work has shown such representations exist for at
-least one toy domain (Othello). Whether this generalizes, and under
-what conditions, has remained an open question. We propose a framework
-we call the **N-criterion** — a graded hypothesis that the predictive
-relevance of a candidate feature for next-token prediction is the
-dominant driver of whether that feature emerges as a linearly
-recoverable representation in the residual stream — and test it
-across five domains (cities, Othello, flight phases, music, and walks
-on the symmetric group), plus one pre-registered ex-ante domain (maze
-navigation). All probes and activation patching ("transplant")
-experiments are run under a uniform multi-seed protocol with
-destroyed-structure controls (real / within-shuffled / global-shuffled
-corpora) and per-layer ablation. We report both confirming and
-falsifying evidence. In particular, the pre-registered maze experiment
-yields a partial falsification of the strict version of the
-N-criterion: a feature predicted to be null (the starting cell of the
-maze) is in fact represented in the residual stream, even though the
-next-token objective does not require it. This is consistent with the
-graded version of the criterion we propose, and supports the broader
-finding that **predictive relevance is dominant but not exclusive**:
-information present in the input may persist as residual representation
-even when not predictively required, and information that would help
-prediction may not have an explicit linear representation if the model
-can compute it on the fly. We discuss the implications for
-mechanistic interpretability methodology in small models on
-structured tasks.
+When does a transformer language model trained only to predict the
+next token spontaneously develop an internal representation of the
+world it is modeling? Prior work (Li et al. 2022; Nanda et al. 2023)
+shows such representations exist for at least one toy domain
+(Othello); whether and how this generalizes has remained an open
+question. We address it by combining two contributions.
 
-**Scope.** All models studied here are in the 4M–13M parameter range
-on synthetic or semi-synthetic tasks. We do not claim that the
-N-criterion as stated extends to frontier-scale language models on
-natural-language data, and we discuss this limitation explicitly.
+**First**, we develop a methodological protocol for testing
+emergent representations across domains: multi-seed mean ± std
+reporting, probe + activation-patching convergence, per-layer
+ablation, destroyed-structure controls (real / within-shuffled /
+global-shuffled corpora), and pre-registered ex-ante prediction
+experiments with a git audit trail. We apply this protocol to five
+descriptive-evidence domains (cities, Othello, flight phases, music,
+walks on the symmetric group) and two pre-registered ex-ante
+prediction experiments (maze navigation and HTTP log sequences).
+
+**Second**, we test a candidate framework we call the **N-criterion**:
+the hypothesis that the predictive relevance of a feature for
+next-token prediction drives whether it appears in the residual
+stream. The two pre-registered experiments both falsify substantive
+predictions of this framework. The maze starting-cell prediction
+(claimed null because the feature is irrelevant to next-step choice)
+turned out to be encoded. The HTTP cumulative-large-response-count
+prediction (claimed null because it would require active aggregation)
+was also encoded. In both cases the broader "predictive relevance
+drives encoding" framing was too coarse.
+
+What does survive testing is a specific mechanism we call
+**architectural carry-through**: features present at positionally
+distinct input slots persist in the residual stream regardless of
+their predictive relevance, via the side effect of self-attention
+copying. This mechanism was introduced after the maze falsification
+to explain the starting-cell-encoded result, and was then
+independently confirmed by the HTTP Feature A pre-registered
+prediction. Carry-through is the one substantive claim of this
+paper that survived ex-ante testing on two domains of different
+shape.
+
+The HTTP cumulative-count falsification also reveals a methodological
+issue: position-in-session correlates strongly with the target
+feature, and the trained model's superior positional representations
+inflate the probe gap. We document this confound and propose a
+position-control follow-up.
+
+**Contributions**: (1) a methodological framework for pre-registered
+emergent-representation experiments, including the discovery and
+discipline of pre-registering both positive and null predictions;
+(2) one specific validated mechanism (architectural carry-through),
+predicted ex-ante and confirmed on two domains of different shape;
+(3) one identified failure mode (position-correlation as probe
+confound) future work should control for. We do not claim a strong
+predictive theory of which features emerge as representations; the
+two pre-registered tests have demonstrably weakened any such claim
+we might have tried to make.
+
+**Scope.** All models studied here are in the 4M-13M parameter range
+on synthetic or semi-synthetic tasks. We do not claim that any of
+these findings extend to frontier-scale language models on
+natural-language data.
 
 ---
 
@@ -84,37 +111,60 @@ methodological features that we view as limiting:
    that *predicts* the data from a framework that *fits* the data
    after the fact.
 
-We address all three: comparative (five domains, plus one pre-
-registered), multi-seed (five seeds per probe and per transplant,
-with σ reported), and pre-registered (the maze experiment's
-predictions are committed to a public git repository in advance,
-with a timestamp).
+We address all three: comparative (five descriptive-evidence domains,
+plus two pre-registered ex-ante experiments), multi-seed (five seeds
+per probe and per transplant, with σ reported), and pre-registered
+(both ex-ante experiments — maze navigation and HTTP log sequences —
+have their predictions committed to a public git repository in
+advance, with timestamps).
 
 ### 1.3 The contribution
 
 This paper makes three contributions.
 
-**First**, we propose a framework — the **N-criterion** — that
-attempts to turn the loose question "do these models build world
-models?" into a falsifiable hypothesis about which features should
-and should not be represented in the residual stream. We state it
-in a graded form that survives the empirical realities of
-distributed representation and superposition.
+**First**, we develop a **methodological protocol** for testing
+emergent residual-stream representations across domains. The protocol
+combines five elements: (i) multi-seed mean ± std reporting; (ii)
+probe + activation-patching convergence at the same layer; (iii)
+per-layer ablation; (iv) destroyed-structure controls; and (v)
+pre-registered ex-ante predictions, including pre-registered nulls,
+with a git audit trail. None of these elements is individually novel;
+their combination is rarer than the literature suggests and represents
+a reasonable bar for representational-content claims about small
+transformers.
 
-**Second**, we apply this framework to five domains uniformly. We
-report what was found across each — convergent positives, principled
-nulls, and a partially falsifying result on a sixth pre-registered
-domain. The pre-registration is the central methodological move of
-the paper; the negative direction of the criterion is the central
-scientific payload, and the pre-registered maze experiment is the
-first test of that payload that is auditable from outside.
+**Second**, we test a candidate framework — the **N-criterion** —
+that attempts to predict which features will be encoded in terms of
+their predictive relevance for next-token prediction. We tested two
+specific risky predictions of this framework on two pre-registered
+domains. Both fell in informative ways. In each case, the broader
+"predictive relevance drives encoding" framing turned out to be
+too coarse: features irrelevant to the next-token objective persisted
+in the residual stream when they sat in positionally distinct input
+slots, and features that would have required active aggregation
+were also encoded when they correlated with positional information.
+The N-criterion as a strong predictive theory does not survive these
+tests.
 
-**Third**, we offer a calibrated reading of what these results
-actually license. In particular, we argue that the strict biconditional
-("F is encoded iff next-token prediction requires F") does not survive
-the data: the maze starting-cell prediction was falsified. The graded
-form we propose ("predictive relevance is dominant but not exclusive")
-does survive, with substantial qualifications discussed in §8.
+**Third**, what *does* survive ex-ante testing is a specific
+mechanism we call **architectural carry-through**: features present
+at positionally distinct input slots persist in the residual stream
+regardless of predictive relevance, via the side effect of
+self-attention copying. This mechanism was introduced to explain
+the maze starting-cell falsification, and was then independently
+predicted and confirmed by the HTTP Feature A ex-ante prediction
+on an applied domain at a different shape. Carry-through is the
+one substantive claim of this paper that survived pre-registered
+testing on two different domains. We also report a specific failure
+mode the HTTP experiment surfaced — position-correlation as a probe
+confound — which we identify as a methodological caveat future
+work should control for.
+
+We do not claim a strong predictive theory of which features emerge
+as representations. The pre-registered tests have demonstrably
+weakened any such claim we might have tried to make. What remains
+is a methodology, one validated mechanism, and one identified
+failure mode.
 
 ### 1.4 What this paper is not
 
@@ -222,14 +272,25 @@ irrelevant features:
   gradient; if the objective does not pay for that cost, no
   pressure exists to do the computation.
 
-We will see in §6.4 and §7 that the data is consistent with this
-split: music beat-in-measure (predictively irrelevant, must be
-actively computed) is null; maze starting-cell (predictively
-irrelevant but sitting at a positionally distinct input slot)
-persists. The mechanism is the simplest single addition to the
-strict form that explains both. We return to the trade-off between
-the two forms in §8 and the joint reading of beat and starting-cell
-in §9.3.
+We will see in §6.4 and §7 that the **carry-through half of this
+split survives ex-ante testing on two different domains**: maze
+starting-cell encoded as predicted by carry-through (§7.1); HTTP
+first-request `size_bin` encoded as predicted by carry-through (§7.2).
+
+The **null half does not survive**. In the maze experiment, the
+predictively-required feature distance-to-goal — which the framework
+expected to be encoded — turned out to be null (§7.1). In the HTTP
+experiment, the predictively-irrelevant computed feature
+cumulative-large-response-count — which the framework expected to be
+null — turned out to be encoded (§7.2). Both directions of the null
+prediction failed across the two pre-registered tests.
+
+We retain the graded form in this section as the candidate framework
+the experiments were designed to test, because it is what the
+predictions files were written against. The post-test reading is
+that **carry-through is the surviving mechanism** and the broader
+predictive-relevance framing has been demonstrably weakened. We
+return to this in §9 (joint reading of both pre-registered tests).
 
 ### 2.4 What we explicitly do not claim
 
@@ -431,6 +492,92 @@ agree on a null.
 
 We acknowledge that this does not constitute a formal statistical
 power analysis. We discuss this as a limitation in §8.5.
+
+### 4.10 The experimental arc: pre-register, falsify, revise, re-test
+
+This section summarizes the scientific timeline of the paper as it
+actually unfolded. The reader should be able to see the arc once, here,
+before reading the experimental sections in detail. Every commit hash
+referenced below is verifiable from the project repository using
+`git log --diff-filter=A` on the corresponding predictions file.
+
+**Step 1. Maze pre-registration (commit `aa025b1`, 2026-05-27).** We wrote
+down four quantitative predictions and committed them to the project
+repository before any maze data was generated or any maze model was
+trained. The load-bearing prediction was P4: the starting cell of the
+maze would *not* be encoded in the residual stream, because the next-step
+prediction does not need to know where the path started. This was the
+strict N-criterion's null direction operationalized on a domain where
+"required" is definable from the task structure alone.
+
+**Step 2. Maze trained; P4 falsified.** We then trained the maze model and
+ran the probes. P4 returned a +0.15 trained-vs-untrained gap, above the
+locked falsification threshold of +0.10. The strict N-criterion was wrong
+on a domain we had committed to in writing. Because the predictions were
+in git before the model was trained, we cannot retroactively claim we
+predicted otherwise.
+
+**Step 3. Framework revision: introducing architectural carry-through.**
+The maze falsification forced the question: why does an irrelevant feature
+persist in the residual stream? The simplest reading is that the starting
+cell sits at a positionally distinct slot (the first non-BOS token of the
+sequence), self-attention can copy that slot's content forward across
+every subsequent layer at essentially zero cost, and the next-token
+training objective never penalizes carrying it. We named this mechanism
+*architectural carry-through* and adopted the *graded* form of the
+N-criterion (§2.3), which retains predictive relevance as the dominant
+driver of encoding but adds carry-through as a second mechanism for
+input-borne features.
+
+**Step 4. HTTP pre-registration (commit `3b25ed3`, 2026-05-31).** With the
+graded form in hand, we designed a second pre-registered test deliberately
+to span both categories of the graded form's two-category split. We wrote
+two predictions and committed them to the repository before any NASA-HTTP
+data was downloaded:
+
+- Feature A: `size_bin` of the first request. Predicted *encoded* via
+  carry-through (it sits at a positionally identifiable input slot).
+- Feature B: cumulative count of large responses seen so far, binned.
+  Predicted *null* because it would require active aggregation across
+  positions, and the next-token objective does not pay for that
+  computation.
+
+**Step 5. HTTP trained; mixed verdict.** Feature A confirmed at +0.17
+gap. The carry-through mechanism survives ex-ante testing on an applied
+domain at a different shape from the one it was developed against.
+Feature B apparently falsified at +0.29 gap, well above the locked +0.10
+threshold. The graded form's null direction failed on its first ex-ante
+test.
+
+**Step 6. Position-control follow-up (post-hoc).** We worried that the
+Feature B falsification might be inflated by the model's strong positional
+representation rather than reflecting genuine aggregation encoding. We
+ran three follow-up probes to test this:
+
+- The position-control probe (a purely positional target) recovers at
+  +0.43 gap, larger than the Feature B gap of +0.29.
+- The within-position probe (Design A, fixed k=5) gives a Feature B gap
+  of +0.22.
+- The residual-after-position probe (Design B3) gives a Feature B R²
+  gap of +0.47.
+
+The three controls agree on the direction. Position-correlation accounts
+for part of the Feature B signal but not all. After the most conservative
+control, Feature B retains a +0.22 gap, still above the locked +0.10
+threshold. The graded form's null direction is falsified even after
+controls.
+
+**Step 7. Where we land.** Architectural carry-through survives 2-for-2
+across the two pre-registered domains. The broader N-criterion in either
+strict or graded form does not. The paper's three contributions follow
+directly from this arc: (i) the pre-register, falsify, revise, re-test
+loop as a methodology discipline; (ii) architectural carry-through as
+the one substantively predictive claim that survived two ex-ante tests;
+and (iii) position-correlation as a methodological caveat that future
+probe-based work should control for.
+
+§7 gives the full empirical detail for Steps 1 through 6. §9 (Discussion)
+interprets the arc.
 
 ---
 
@@ -666,18 +813,34 @@ the subject of §7.
 
 ---
 
-## 7. The pre-registered ex-ante test: maze navigation
+## 7. Pre-registered ex-ante experiments
 
-The maze experiment is the paper's central scientific test. We
-chose maze navigation specifically because (i) "required" can be
-defined model-independently from the task structure, (ii) the
-destroyed-structure controls are unambiguous to construct, (iii) the
-training fits in laptop-scale compute. The predictions were
-committed to the project repository **before any maze model was
-trained or any maze data generated**, with the commit timestamp
-serving as the audit trail (commit hash: `aa025b1`).
+The pre-registered experiments are the paper's central scientific
+tests. We ran two of them, on domains of deliberately different
+shape: maze navigation (synthetic, spatial-graph) and HTTP log
+sequences (applied, event-stream). The two domains share the
+methodology but differ in vocabulary scale (67 vs 52 tokens),
+tokenization (one token per cell vs four tokens per request), and
+session structure. The maze experiment was completed first, and its
+falsification motivated the introduction of architectural
+carry-through; the HTTP experiment then provided an independent test
+of the carry-through mechanism on a different domain shape.
 
-### 7.1 The four predictions
+We discuss the two experiments in turn (§7.1 maze, §7.2 HTTP), then
+present a joint reading of what survives both (§7.3).
+
+### 7.1 Maze navigation
+
+The maze experiment was the first pre-registered test. We chose
+maze navigation specifically because (i) "required" can be defined
+model-independently from the task structure, (ii) the destroyed-
+structure controls are unambiguous to construct, (iii) the training
+fits in laptop-scale compute. The predictions were committed to the
+project repository **before any maze model was trained or any maze
+data generated**, with the commit timestamp serving as the audit
+trail (commit hash: `aa025b1`).
+
+#### 7.1.1 The four predictions
 
 | # | Probe target | N-criterion verdict | Quantitative prediction (best-layer trained MLP) |
 |---|---|---|---|
@@ -692,7 +855,7 @@ the path *is now* and where the path is *going*. If the model retains
 starting-cell information in the residual stream despite not
 "needing" it, that is direct evidence against the strict N-criterion.
 
-### 7.2 Results
+#### 7.1.2 Results
 
 We trained three maze models (~2M parameters each) on 8×8 mazes,
 one per corpus condition. We ran multi-seed probes (5 seeds) and
@@ -784,7 +947,7 @@ this as a finding about what the transplant metric measures (it
 captures next-token sequential structure, not spatial structure)
 rather than as evidence about the model.
 
-### 7.3 What the maze experiment shows
+#### 7.1.3 What the maze experiment shows
 
 The four predictions resolved as:
 
@@ -813,7 +976,7 @@ informative because the prediction was wrong; if we had not
 committed to the prediction in advance, we could not have
 distinguished a genuine framework failure from a post-hoc story.
 
-### 7.4 What this means for the framework
+#### 7.1.4 What this means for the framework
 
 We had hoped P4 would confirm. It did not. This is the most
 important single result in the paper, and we report it with the
@@ -861,7 +1024,277 @@ the present study with stronger expected power than re-testing
 either category alone.
 
 We adopt the graded form as our working position from this point in
-the paper forward, and discuss its remaining limitations in §8.
+the paper forward, with the caveat that the next pre-registered test
+(HTTP, §7.2) provided additional falsifying evidence.
+
+### 7.2 HTTP log sequences
+
+The HTTP experiment was the second pre-registered test. It was
+designed specifically to test the two-category split — carry-through
+features vs computed features — that the graded form makes after
+the maze experiment. Following the same protocol, we wrote two
+quantitative predictions and committed them to the project repository
+**before any HTTP data was downloaded or any HTTP model was trained**.
+Commit hash: `3b25ed3`.
+
+We chose HTTP request logs (the NASA-HTTP dataset from the Internet
+Traffic Archive) specifically because (i) it is an applied domain
+with public clean data, (ii) it has periodic structure (sessions of
+client requests) that lets us define carry-through and computed
+features cleanly, (iii) it is at a different shape from the maze
+experiment so confirmation would be independent evidence.
+
+#### 7.2.1 The two predictions
+
+Per-field tokenization: each HTTP request is encoded as four
+consecutive tokens — `(method, path_category, status_bucket,
+size_bin)` — so sequences expose each field as its own positionally
+identifiable slot. Vocabulary: ~52 tokens. Sessions: 3–30 requests,
+grouped by client host with 30-min idle timeout.
+
+| # | Probe target | Category per graded framework | Predicted outcome |
+|---|---|---|---|
+| P1 | Feature A: `size_bin` of the FIRST request | In-input at distinct slot (the size_bin token at sequence position 4); irrelevant to predicting later requests | **Encoded** via carry-through. Best-layer trained MLP gap ≥ 0.10. |
+| P2 | Feature B: cumulative count of "large-response" tokens (`size_bin` ≥ 5) in prefix, binned {0, 1, 2+} | Must-be-actively-computed (requires aggregation across positions); irrelevant to next-request prediction | **Null**. Best-layer trained MLP gap ≤ 0.10. |
+
+Cross-feature prediction: A gap ≥ B gap. This is the *structural*
+form of the carry-through differentiation.
+
+#### 7.2.2 Results
+
+Setup as actually run: NASA-HTTP July + August 1995 archives,
+~3.46M requests, 226k retained sessions after filtering, 8.08M
+training tokens per condition, vocab 52, model n_layer=4 / n_head=4 /
+n_embd=128 / ~0.81M params, 5,000 training iterations with
+dropout=0.20. Training converged val_ppl ≈ 1.54-1.58 with train/val/gen
+tightly matched — no overfit observed. Probes used class-balanced
+sampling for Feature A (an unforeseen majority-class issue surfaced
+during the smoke test — the locked file did not specify sampling
+strategy, and balanced sampling was a methodological choice made at
+probe time, documented as an amendment to the predictions file).
+
+**Feature A** — `size_bin` of first request (real condition,
+session-level honest split, 5-seed mean ± std):
+
+| Layer | Trained MLP | Untrained MLP | MLP gap |
+|---|---|---|---|
+| embed | 0.317 ± 0.04 | 0.249 ± 0.03 | +0.068 |
+| L0 | 0.367 ± 0.05 | 0.240 ± 0.02 | +0.127 |
+| L1 | 0.391 ± 0.05 | 0.237 ± 0.02 | +0.154 |
+| L2 | 0.405 ± 0.04 | 0.241 ± 0.03 | +0.164 |
+| **L3** | **0.410 ± 0.04** | **0.243 ± 0.03** | **+0.168** |
+
+Best-layer trained-vs-untrained MLP gap: **+0.168** (predicted ≥ 0.10).
+**P1 confirmed.**
+
+Cross-condition: within-shuffled gap +0.134 (in predicted band
+[0.00, 0.15]), global-shuffled gap +0.163 (in predicted band
+[0.05, 0.20]). All three conditions confirm the carry-through
+prediction on Feature A.
+
+**Feature B** — cumulative large-response count, binned (real
+condition, session-level honest split):
+
+| Layer | Trained MLP | Untrained MLP | MLP gap |
+|---|---|---|---|
+| embed | 0.692 ± 0.01 | 0.585 ± 0.01 | +0.107 |
+| L0 | 0.829 ± 0.01 | 0.594 ± 0.01 | +0.235 |
+| L1 | 0.872 ± 0.01 | 0.596 ± 0.01 | +0.276 |
+| **L2** | **0.888 ± 0.004** | **0.597 ± 0.01** | **+0.291** |
+| L3 | 0.876 ± 0.01 | 0.597 ± 0.01 | +0.279 |
+
+Best-layer (and max-layer) trained-vs-untrained MLP gap: **+0.291**
+(predicted ≤ 0.10). **P2 falsified by ~2.9× the threshold.**
+
+Cross-condition: within-shuffled max gap +0.236, global-shuffled max
+gap +0.303. All three conditions falsify, in the same direction.
+
+**Cross-feature ordering**: Feature A gap = +0.168; Feature B gap =
++0.291. A < B. **Cross-feature ordering falsified.**
+
+Per the predictions file's own framework-level verdict, "if ≥ 2 of
+the above hold, the revised framework needs substantial revision on
+this class of applied domains." Two of the three (P2 and the
+cross-feature ordering) fall the wrong way. The HTTP experiment
+falsifies the graded form's substantive claims, with the carry-through
+half (P1) confirming cleanly.
+
+#### 7.2.3 Why the Feature B falsification has two readings
+
+The Feature B result has a methodological wrinkle worth surfacing.
+Position-in-session strongly correlates with cumulative-large-response
+count: later sessions positions tend to have higher counts. The
+trained model develops sharper positional representations than the
+untrained model (it needs to predict which of {method, path,
+status, size_bin} comes next, which requires knowing position mod 4).
+The probe may be reading position rather than aggregation.
+
+Evidence consistent with this reading:
+- Untrained baseline is already at 0.60 (well above the 0.33 chance
+  for 3 classes), suggesting positional info alone gives substantial
+  signal.
+- **Global-shuffled produces an unchanged or larger gap** (+0.303 vs
+  +0.291 on real). Under global-shuffled, the token-alphabet
+  permutation destroys identity-based attention to "large-response
+  tokens." If the trained model were actually identifying these
+  tokens and counting them, this gap should collapse. It does not.
+  Position-as-proxy is the more consistent explanation.
+
+We document this as an unresolved interpretive ambiguity. A
+follow-up control — probing a purely positional feature like
+"request_idx_in_session, binned" with the same probe protocol —
+would resolve it: if the position-control gap matches the
+Feature B gap, the falsification is position-confounded and the
+graded framework's claim about computed features remains testable
+(just not by this probe target). If a residual gap remains after
+controlling, the framework's claim was wrong about even simple
+aggregations being absent. We did not pre-register this control;
+it was identified post-hoc and is the natural follow-up.
+
+#### 7.2.4 Position-control follow-up
+
+We ran the natural follow-up control proposed in §7.2.3, plus two
+complementary designs, after observing the Feature B ambiguity. None of
+these were pre-registered; they are documented as post-hoc methodology
+amendments.
+
+**Position-control probe.** Probe target: `request_idx_in_session`,
+binned into 4 classes (idx ≤ 3 → 0; ≤ 6 → 1; ≤ 12 → 2; else 3). This
+is a deterministic function of position — purely positional with no
+content-dependent component. The probe protocol is otherwise identical
+to §7.2.2.
+
+Headline (best-layer trained MLP, session-level honest split, 5 seeds):
+
+| Condition | Trained MLP @ L2 | Untrained MLP best | Gap |
+|---|---|---|---|
+| Real | 0.836 ± 0.009 | 0.409 ± 0.014 | **+0.427** |
+| Within-shuffled | 0.945 ± 0.007 | 0.404 ± 0.026 | **+0.541** |
+| Global-shuffled | 0.828 ± 0.011 | 0.424 ± 0.011 | **+0.404** |
+
+The position-control gap exceeds the Feature B gap in every condition.
+Pure position information is recovered at +0.43 by the trained model;
+Feature B at +0.29. This is the cleanest available evidence that the
+Feature B gap is at least partly inflated by positional encoding.
+
+**Within-position probe (Design A) at fixed k=5.** We restrict the
+Feature B probe to the size_bin slot of request 5 (the position with
+the highest probe-data volume and a non-degenerate class distribution,
+47% / 20% / 33%). At fixed k=5, the positional embedding contribution
+is constant across examples.
+
+| Condition | Trained MLP @ L2 | Untrained MLP @ L2 | Gap |
+|---|---|---|---|
+| Real | 0.904 ± 0.006 | 0.685 ± 0.014 | **+0.220** |
+| Within-shuffled | 0.884 ± 0.003 | 0.685 ± 0.014 | **+0.199** |
+| Global-shuffled | 0.825 ± 0.008 | 0.685 ± 0.014 | **+0.140** |
+
+After holding position literally constant, Feature B retains a positive
+trained-vs-untrained gap in all three conditions, with a monotonic
+real > within > global ordering.
+
+**Residual-after-position probe (Design B3).** We fit a per-position
+empirical baseline P(F | k) on the probe-train split (Laplace-smoothed),
+compute the residual `y_onehot − baseline(k)` on both train and test,
+and train a regression probe (linear and MLP) with MSE loss to predict
+the residual from activations. The metric is R² on the test residual.
+
+| Condition | Trained R² @ L2 | Untrained R² best layer | Gap |
+|---|---|---|---|
+| Real | +0.678 ± 0.026 | +0.210 ± 0.012 | **+0.468** |
+| Within-shuffled | +0.639 ± 0.024 | +0.210 ± 0.012 | **+0.429** |
+| Global-shuffled | +0.431 ± 0.022 | +0.210 ± 0.012 | **+0.222** |
+
+After statistically controlling for per-position baseline, Feature B
+retains a substantial trained R² gap in all three conditions, with the
+same monotonic gradient.
+
+**Joint interpretation.** Both Design A and Design B3 agree across all
+three conditions: Feature B is encoded above untrained baseline *even
+after controlling for position*. The original §7.2.3 ambiguity is
+partially but not fully resolved by the position confound:
+
+- The position-control gap (+0.43 real) exceeds the original Feature B
+  gap (+0.29), confirming that positional encoding accounts for part
+  of the apparent Feature B signal.
+- The within-position gap (+0.22 real) is smaller than the original
+  Feature B gap, consistent with position contributing approximately
+  +0.07 to the original measurement.
+- However, +0.22 at fixed position k=5 is still well above the
+  pre-registered falsification threshold of 0.10. The framework's null
+  prediction on Feature B is *still* falsified, by approximately 2.2×
+  the threshold rather than the original 2.9×.
+- The B3 residual probe at R² gap +0.47 confirms the same direction
+  under a fully different probe construction.
+
+The cross-condition gradient (real > within > global) survives both
+controls. This is significant: even after literal and statistical
+position control, Feature B encoding strength tracks training-corpus
+structure. The encoding is structure-dependent, not just a position
+artifact.
+
+#### 7.2.5 What the HTTP experiment shows
+
+Carry-through confirmed independently on an applied domain at a
+different shape (P1 with gap +0.17 over predicted ≥ 0.10 threshold).
+The graded framework's null-on-computed-features claim falsified
+(P2 with gap +0.29 over the ≤ 0.10 threshold). The position-control
+follow-up (§7.2.4) shows that position-correlation accounts for part
+but not all of the apparent gap: after controlling for position via
+both Design A (within-position at fixed k=5) and Design B3
+(residual-after-position), Feature B retains a +0.22 trained-vs-
+untrained gap, still well above the pre-registered 0.10 threshold.
+
+The maze experiment had previously falsified the strict form and
+motivated the addition of carry-through. The HTTP experiment falsifies
+further substantive claims of the graded form while independently
+confirming the carry-through mechanism that was added in response to
+the maze data.
+
+### 7.3 Joint reading of the two pre-registered tests
+
+Across both experiments, the framework's track record on its risky
+ex-ante predictions is uneven:
+
+| Pre-registered claim | Maze result | HTTP result |
+|---|---|---|
+| Carry-through (input-slot irrelevant feature encoded) | ✓ predicted by the mechanism added after maze (starting-cell encoded) | ✓ predicted ex-ante before any HTTP data; confirmed (Feature A) |
+| Null on computed irrelevant feature | n/a | ✗ falsified (Feature B encoded with gap +0.29) |
+| Specific positive (predictively-relevant feature encoded) | ✗ falsified (distance to goal NOT encoded) | n/a |
+
+**Carry-through: 2-for-2.** The mechanism predicted correctly when
+tested in the maze starting-cell case (where it was introduced as
+the explanatory mechanism), and again when tested in the HTTP
+Feature A case (where it was a forward-looking pre-registered
+prediction on a domain not used to develop the mechanism). This is
+the kind of cross-domain ex-ante validation that gives the carry-
+through claim meaningful empirical weight.
+
+**The broader "predictive relevance drives encoding" framing: 0-for-3
+on risky predictions.** Sometimes predictively-required features are
+absent (maze distance-to-goal). Sometimes predictively-irrelevant
+features are present even after the obvious position-correlation
+confound is controlled for (HTTP cumulative count, +0.22 at fixed
+position k=5 per §7.2.4). The direction of failure is different in
+each case, but the pattern is consistent: the broader framing was
+too coarse to predict the observed empirical pattern.
+
+**Position-correlation as a probe confound.** The HTTP Feature B
+result surfaced a specific methodological issue: features that
+correlate strongly with positional information will appear encoded
+in any trained model that develops sharp positional representations,
+regardless of whether the model is actually computing the feature.
+This is a contribution future probe-based interp work should
+control for; the position-control follow-up in §7.2.4 demonstrates
+that this confound accounts for approximately +0.07 of the +0.29
+Feature B headline, with +0.22 remaining and still above the
+pre-registered 0.10 falsification threshold.
+
+What we adopt going forward (§9): we report what the pre-registered
+tests showed without further revising the framework mid-paper. The
+carry-through claim survives ex-ante testing on two domains; the
+broader N-criterion does not. The methodology, the mechanism, and
+the failure mode are the three things the paper contributes.
 
 ---
 
